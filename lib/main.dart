@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+const supabaseUrl = 'https://jcwxzybnrickofvzkgge.supabase.co';
+const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
+
+Future<void> main() async {
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
   runApp(const MainApp());
 }
 

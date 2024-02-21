@@ -1,3 +1,4 @@
+import 'package:brew_battles/Pages/front_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,12 +15,34 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
+    return const BrewBattlesApp();
+  }
+}
+
+class BrewBattlesApp extends StatelessWidget {
+  const BrewBattlesApp({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme(
+          brightness: Brightness.light,
+          primary: Color.fromARGB(255, 103, 0, 151),
+          onPrimary: Color.fromARGB(255, 255, 255, 255),
+          secondary: Color.fromARGB(255, 255, 0, 0),
+          onSecondary: Color.fromARGB(255, 255, 0, 0),
+          error: Color.fromARGB(255, 255, 0, 0),
+          onError: Color.fromARGB(255, 255, 0, 0),
+          background: Color.fromARGB(255, 255, 0, 0),
+          onBackground: Color.fromARGB(255, 255, 0, 0),
+          surface: Color.fromARGB(255, 255, 0, 0),
+          onSurface: Color.fromARGB(255, 255, 0, 0),
         ),
       ),
+      home: const FrontPage(),
     );
   }
 }

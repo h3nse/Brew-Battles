@@ -1,3 +1,4 @@
+import 'package:brew_battles/Global/exceptions.dart';
 import 'package:brew_battles/Global/player.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,9 +14,23 @@ class ChallengeOpponentPage extends StatefulWidget {
 
 class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
   final opponentInputController = TextEditingController();
-  static const snackBar = SnackBar(
-    content: Text("Couldn't find your opponent"),
-  );
+
+  @override
+  void initState() {
+    super.initState();
+    supabase
+        .channel('public:players')
+        .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'players',
+            filter: PostgresChangeFilter(
+                type: PostgresChangeFilterType.eq,
+                column: 'id',
+                value: Player().id),
+            callback: (payload) {})
+        .subscribe();
+  }
 
   @override
   void dispose() {
@@ -24,11 +39,16 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
   }
 
   Future challengeOpponent(String opponentName) async {
-    await supabase
+    final playersOpponentId = await supabase
         .from('players')
-        .select('name')
+        .select('opponent_id')
         .eq('name', opponentName)
         .single();
+
+    if (playersOpponentId['opponent_id'] != null) {
+      throw BusyOpponentException('Player already has an opponent');
+    }
+
     await supabase
         .from('players')
         .update({'opponent_id': Player().id}).eq('name', opponentName);
@@ -63,9 +83,24 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
                 String attemptedOpponent = opponentInputController.text;
                 try {
                   await challengeOpponent(attemptedOpponent);
+                } on BusyOpponentException {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            "Player already has an opponent or is being challenged by another player"),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  }
                 } catch (_) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Couldn't find your opponent"),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
                   }
                 }
               },

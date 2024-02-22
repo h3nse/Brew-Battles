@@ -23,9 +23,14 @@ class FrontPage extends StatelessWidget {
   }
 
   void _addPlayer() async {
-    final name = _generateName();
-    await supabase.from('players').insert({'name': name});
-    Player().name = name;
+    while (true) {
+      try {
+        final name = _generateName();
+        Player().name = name;
+        await supabase.from('players').insert({'name': name});
+        break;
+      } catch (_) {}
+    }
   }
 
   @override

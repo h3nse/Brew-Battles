@@ -1,3 +1,4 @@
+import 'package:brew_battles/Global/player.dart';
 import 'package:flutter/material.dart';
 
 class ChallengeOpponentPage extends StatefulWidget {
@@ -20,7 +21,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text('Your name:'),
+            Text('Hello ${Player().name}!'),
             ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(

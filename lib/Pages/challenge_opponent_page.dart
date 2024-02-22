@@ -1,5 +1,7 @@
 import 'package:brew_battles/Global/exceptions.dart';
 import 'package:brew_battles/Global/player.dart';
+import 'package:brew_battles/Managers/challenge_opponent_manager.dart';
+import 'package:brew_battles/Pages/game_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,9 +17,11 @@ class ChallengeOpponentPage extends StatefulWidget {
 class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
   final opponentInputController = TextEditingController();
   int challengedPlayerId = 0;
+  String challengedPlayerName = '';
   bool challenging = false;
   late RealtimeChannel opponentChannel;
   String challengerName = '';
+  int challengerId = 0;
 
   @override
   void initState() {
@@ -33,19 +37,29 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
                 column: 'id',
                 value: Player().id),
             callback: (payload) async {
-              if (payload.newRecord['opponent_id'] == null) {
+              final data = payload.newRecord;
+
+              if (data['opponent_id'] == null) {
                 setState(() {
                   challengerName = '';
                 });
                 return;
               }
-              final challengerNameMap = await supabase
+              if (challenging && data['opponent_id'] == challengedPlayerId) {
+                challengeAccepted();
+              } else if (challenging) {
+                await supabase
+                    .from('players')
+                    .update({'opponent_id': null}).eq('id', Player().id);
+              }
+              final challengerMap = await supabase
                   .from('players')
-                  .select('name')
-                  .eq('id', payload.newRecord['opponent_id'])
+                  .select('id, name')
+                  .eq('id', data['opponent_id'])
                   .single();
+              challengerId = challengerMap['id'];
               setState(() {
-                challengerName = challengerNameMap['name'];
+                challengerName = challengerMap['name'];
               });
             })
         .subscribe();
@@ -57,7 +71,42 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
     opponentInputController.dispose();
   }
 
-  cancelChallenge(String cancellationMessage) {
+  Future challengeOpponent(String opponentName) async {
+    final challengedPlayer = await supabase
+        .from('players')
+        .select('id, opponent_id')
+        .eq('name', opponentName)
+        .single();
+    if (challengedPlayer['opponent_id'] != null) {
+      throw BusyOpponentException('Player already has an opponent');
+    }
+    setState(() {
+      challenging = true;
+    });
+    challengedPlayerId = challengedPlayer['id'];
+    challengedPlayerName = opponentName;
+    await supabase
+        .from('players')
+        .update({'opponent_id': Player().id}).eq('name', opponentName);
+    opponentChannel = supabase
+        .channel('opponent')
+        .onPostgresChanges(
+            event: PostgresChangeEvent.update,
+            schema: 'public',
+            table: 'players',
+            filter: PostgresChangeFilter(
+                type: PostgresChangeFilterType.eq,
+                column: 'id',
+                value: challengedPlayer['id']),
+            callback: (payload) {
+              if (payload.newRecord['opponent_id'] == null && challenging) {
+                cancelChallenge('Opponent rejected your challenge');
+              }
+            })
+        .subscribe();
+  }
+
+  void cancelChallenge(String cancellationMessage) {
     setState(() {
       challenging = false;
     });
@@ -78,40 +127,34 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
     await supabase
         .from('players')
         .update({'opponent_id': null}).eq('id', Player().id);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Challenge rejected'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
-  Future challengeOpponent(String opponentName) async {
-    final challengedPlayer = await supabase
-        .from('players')
-        .select('id, opponent_id')
-        .eq('name', opponentName)
-        .single();
-    if (challengedPlayer['opponent_id'] != null) {
-      throw BusyOpponentException('Player already has an opponent');
-    }
-    setState(() {
-      challenging = true;
-    });
-    challengedPlayerId = challengedPlayer['id'];
+  void acceptChallenge() async {
     await supabase
         .from('players')
-        .update({'opponent_id': Player().id}).eq('name', opponentName);
-    opponentChannel = supabase
-        .channel('opponent')
-        .onPostgresChanges(
-            event: PostgresChangeEvent.update,
-            schema: 'public',
-            table: 'players',
-            filter: PostgresChangeFilter(
-                type: PostgresChangeFilterType.eq,
-                column: 'id',
-                value: challengedPlayer['id']),
-            callback: (payload) {
-              if (payload.newRecord['opponent_id'] == null && challenging) {
-                cancelChallenge('Opponent rejected your challenge');
-              }
-            })
-        .subscribe();
+        .update({'opponent_id': Player().id}).eq('id', challengerId);
+    Player().opponentId = challengerId;
+    Player().opponentName = challengerName;
+    if (context.mounted) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const GamePage()));
+    }
+  }
+
+  void challengeAccepted() {
+    Player().opponentId = challengedPlayerId;
+    Player().opponentName = challengedPlayerName;
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const GamePage()));
   }
 
   @override
@@ -198,12 +241,27 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.primary),
+                            foregroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.onPrimary),
+                          ),
                           onPressed: () {
                             rejectChallenge();
                           },
                           child: const Text('Reject')),
                       ElevatedButton(
-                          onPressed: () {}, child: const Text('Accept'))
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.primary),
+                            foregroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.onPrimary),
+                          ),
+                          onPressed: () {
+                            acceptChallenge();
+                          },
+                          child: const Text('Accept'))
                     ],
                   )
                 ],

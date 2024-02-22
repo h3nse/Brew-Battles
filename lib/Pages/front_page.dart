@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:brew_battles/Global/constants.dart';
+import 'package:brew_battles/Global/player.dart';
 import 'package:brew_battles/Pages/challenge_opponent_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -24,6 +25,7 @@ class FrontPage extends StatelessWidget {
   void _addPlayer() async {
     final name = _generateName();
     await supabase.from('players').insert({'name': name});
+    Player().name = name;
   }
 
   @override
@@ -43,7 +45,9 @@ class FrontPage extends StatelessWidget {
                   Theme.of(context).colorScheme.onPrimary),
             ),
             onPressed: () {
-              _addPlayer();
+              if (Player().name == '') {
+                _addPlayer();
+              }
               Navigator.push(
                   context,
                   MaterialPageRoute(

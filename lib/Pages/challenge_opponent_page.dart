@@ -17,6 +17,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
   int challengedPlayerId = 0;
   bool challenging = false;
   late RealtimeChannel opponentChannel;
+  String challengerName = '';
 
   @override
   void initState() {
@@ -31,7 +32,22 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
                 type: PostgresChangeFilterType.eq,
                 column: 'id',
                 value: Player().id),
-            callback: (payload) {})
+            callback: (payload) async {
+              if (payload.newRecord['opponent_id'] == null) {
+                setState(() {
+                  challengerName = '';
+                });
+                return;
+              }
+              final challengerNameMap = await supabase
+                  .from('players')
+                  .select('name')
+                  .eq('id', payload.newRecord['opponent_id'])
+                  .single();
+              setState(() {
+                challengerName = challengerNameMap['name'];
+              });
+            })
         .subscribe();
   }
 
@@ -58,7 +74,11 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
     }
   }
 
-  void rejectChallenge() {}
+  void rejectChallenge() async {
+    await supabase
+        .from('players')
+        .update({'opponent_id': null}).eq('id', Player().id);
+  }
 
   Future challengeOpponent(String opponentName) async {
     final challengedPlayer = await supabase
@@ -103,69 +123,91 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
         title: const Text('Challenge Opponent Page'),
       ),
       body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Hello ${Player().name}!'),
-            TextFormField(
-              controller: opponentInputController,
-              decoration:
-                  const InputDecoration(labelText: ("Enter an opponents name")),
-            ),
-            !challenging
-                ? ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Theme.of(context).colorScheme.primary),
-                      foregroundColor: MaterialStateProperty.all<Color>(
-                          Theme.of(context).colorScheme.onPrimary),
-                    ),
-                    onPressed: () async {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      String attemptedOpponent = opponentInputController.text;
-                      try {
-                        await challengeOpponent(attemptedOpponent);
-                      } on BusyOpponentException {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  "Player already has an opponent or is being challenged by another player"),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
-                        }
-                      } catch (_) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Couldn't find your opponent"),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    child: const Text('Challenge Opponent'),
+        child: (challengerName == '')
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('Hello ${Player().name}!'),
+                  TextFormField(
+                    controller: opponentInputController,
+                    decoration: const InputDecoration(
+                        labelText: ("Enter an opponents name")),
+                  ),
+                  !challenging
+                      ? ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.primary),
+                            foregroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.onPrimary),
+                          ),
+                          onPressed: () async {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            String attemptedOpponent =
+                                opponentInputController.text;
+                            try {
+                              await challengeOpponent(attemptedOpponent);
+                            } on BusyOpponentException {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        "Player already has an opponent or is being challenged by another player"),
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            } catch (_) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text("Couldn't find your opponent"),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          child: const Text('Challenge Opponent'),
+                        )
+                      : const Text('Waiting for opponent to accept...'),
+                  challenging
+                      ? ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.primary),
+                            foregroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.onPrimary),
+                          ),
+                          onPressed: () async {
+                            cancelChallenge('Challenge cancelled');
+                            await supabase
+                                .from('players')
+                                .update({'opponent_id': null}).eq(
+                                    'id', challengedPlayerId);
+                          },
+                          child: const Text('cancel'))
+                      : Container()
+                ],
+              )
+            : Column(
+                children: [
+                  Text('$challengerName has challenged you!'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                          onPressed: () {
+                            rejectChallenge();
+                          },
+                          child: const Text('Reject')),
+                      ElevatedButton(
+                          onPressed: () {}, child: const Text('Accept'))
+                    ],
                   )
-                : const Text('Waiting for opponent to accept...'),
-            challenging
-                ? ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Theme.of(context).colorScheme.primary),
-                      foregroundColor: MaterialStateProperty.all<Color>(
-                          Theme.of(context).colorScheme.onPrimary),
-                    ),
-                    onPressed: () async {
-                      cancelChallenge('Challenge cancelled');
-                      await supabase.from('players').update(
-                          {'opponent_id': null}).eq('id', challengedPlayerId);
-                    },
-                    child: const Text('cancel'))
-                : Container()
-          ],
-        ),
+                ],
+              ),
       ),
     );
   }

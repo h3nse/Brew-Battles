@@ -1,6 +1,5 @@
 import 'package:brew_battles/Global/exceptions.dart';
 import 'package:brew_battles/Global/player.dart';
-import 'package:brew_battles/Managers/challenge_opponent_manager.dart';
 import 'package:brew_battles/Pages/game_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

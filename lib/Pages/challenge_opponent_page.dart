@@ -16,21 +16,23 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         title: const Text('Challenge Opponent Page'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Text('Your ID:'),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(
-                  Theme.of(context).colorScheme.primary),
-              foregroundColor: MaterialStateProperty.all<Color>(
-                  Theme.of(context).colorScheme.onPrimary),
-            ),
-            onPressed: () {},
-            child: const Text('Challenge Opponent'),
-          )
-        ],
+      body: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text('Your name:'),
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(
+                    Theme.of(context).colorScheme.primary),
+                foregroundColor: MaterialStateProperty.all<Color>(
+                    Theme.of(context).colorScheme.onPrimary),
+              ),
+              onPressed: () {},
+              child: const Text('Challenge Opponent'),
+            )
+          ],
+        ),
       ),
     );
   }

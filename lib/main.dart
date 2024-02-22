@@ -1,11 +1,16 @@
 import 'package:brew_battles/Pages/front_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 const supabaseUrl = 'https://jcwxzybnrickofvzkgge.supabase.co';
 const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
 
 Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+  const supabaseUrl = 'https://jcwxzybnrickofvzkgge.supabase.co';
+  final supabaseKey = dotenv.env['SUPABASE_KEY']!;
+
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
   runApp(const MainApp());
 }

@@ -22,12 +22,13 @@ class FrontPage extends StatelessWidget {
     return name;
   }
 
-  void _addPlayer() async {
+  void _addPlayer(int id) async {
     while (true) {
       try {
         final name = _generateName();
         Player().name = name;
-        await supabase.from('players').insert({'name': name});
+        Player().id = id;
+        await supabase.from('players').insert({'id': id, 'name': name});
         break;
       } catch (_) {}
     }
@@ -51,7 +52,7 @@ class FrontPage extends StatelessWidget {
             ),
             onPressed: () {
               if (Player().name == '') {
-                _addPlayer();
+                _addPlayer(Random().nextInt(10000)); // Create better id system
               }
               Navigator.push(
                   context,

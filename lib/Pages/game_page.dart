@@ -1,10 +1,10 @@
 import 'package:brew_battles/Global/player.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
+import 'package:brew_battles/views/game_running_view.dart';
+import 'package:brew_battles/views/game_starting_view.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:timer_count_down/timer_count_down.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -71,47 +71,6 @@ class _GamePageState extends State<GamePage> {
           return view;
         },
       )),
-    );
-  }
-}
-
-class GameStartingView extends StatefulWidget {
-  const GameStartingView({super.key, required this.changeGamestate});
-  final Function changeGamestate;
-
-  @override
-  State<GameStartingView> createState() => _GameStartingViewState();
-}
-
-class _GameStartingViewState extends State<GameStartingView> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-        child: Countdown(
-      seconds: 3,
-      build: (BuildContext context, double time) => Text(
-        NumberFormat("0", "en_US").format(time).toString(),
-        style: const TextStyle(fontSize: 24),
-      ),
-      onFinished: () {
-        if (Player().isManager) {
-          widget.changeGamestate('running');
-        }
-      },
-    ));
-  }
-}
-
-class GameRunningView extends StatelessWidget {
-  const GameRunningView({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [Text(Player().name), Text(Player().opponentName)],
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:brew_battles/Global/exceptions.dart';
 import 'package:brew_battles/Global/player.dart';
 import 'package:brew_battles/Pages/game_page.dart';
@@ -46,11 +48,10 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
                 return;
               }
               if (isChallenging && data['opponent_id'] == challengedPlayerId) {
+                Player().duelId = data['duel_id'];
                 challengeAccepted();
               } else if (isChallenging) {
-                await supabase
-                    .from('players')
-                    .update({'opponent_id': null}).eq('id', Player().id);
+                await denyIncomingChallenge();
               }
               final challengerMap = await supabase
                   .from('players')
@@ -63,6 +64,12 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
               });
             })
         .subscribe();
+  }
+
+  Future<void> denyIncomingChallenge() async {
+    await supabase
+        .from('players')
+        .update({'opponent_id': null}).eq('id', Player().id);
   }
 
   @override
@@ -139,22 +146,36 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
   }
 
   void acceptChallenge() async {
-    await supabase
-        .from('players')
-        .update({'opponent_id': Player().id}).eq('id', challengerId);
+    final random = Random();
+    final duelId = random.nextInt(10000);
+
     Player().opponentId = challengerId;
     Player().opponentName = challengerName;
+    Player().duelId = duelId;
+
+    await supabase.from('duels').insert({'id': duelId});
+
+    await supabase
+        .from('players')
+        .update({'duel_id': duelId}).eq('id', Player().id);
+
+    await supabase.from('players').update(
+        {'opponent_id': Player().id, 'duel_id': duelId}).eq('id', challengerId);
+
     if (context.mounted) {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => const GamePage()));
     }
   }
 
-  void challengeAccepted() {
+  void challengeAccepted() async {
     Player().opponentId = challengedPlayerId;
     Player().opponentName = challengedPlayerName;
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const GamePage()));
+
+    if (context.mounted) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const GamePage()));
+    }
   }
 
   @override

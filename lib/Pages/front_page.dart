@@ -52,7 +52,8 @@ class FrontPage extends StatelessWidget {
             ),
             onPressed: () {
               if (Player().name == '') {
-                _addPlayer(Random().nextInt(10000)); // Create better id system
+                final random = Random();
+                _addPlayer(random.nextInt(10000)); // Create better id system
               }
               Navigator.push(
                   context,

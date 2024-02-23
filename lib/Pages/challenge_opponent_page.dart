@@ -41,29 +41,44 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
             callback: (payload) async {
               final data = payload.newRecord;
 
+              // If your duelId gets changed while you're challenging, call challenge accepted
+              if (data['duel_id'] != null && isChallenging) {
+                challengeAccepted();
+              }
+              // If your duelId gets changed while you're not challenging, switch screen to game_page
+              if (data['duel_id'] != null) {
+                changeToGamePage();
+              }
+              // If your opponentID gets set to null, set challengerName to an empty string
               if (data['opponent_id'] == null) {
                 setState(() {
                   challengerName = '';
                 });
                 return;
               }
-              if (isChallenging && data['opponent_id'] == challengedPlayerId) {
-                Player().duelId = data['duel_id'];
-                challengeAccepted();
-              } else if (isChallenging) {
+              // If your opponentID gets changed while not challenging, set challengerName and Id to the name and Id of the opponent
+              else if (!isChallenging) {
+                final challengerMap = await supabase
+                    .from('players')
+                    .select('id, name')
+                    .eq('id', data['opponent_id'])
+                    .single();
+                challengerId = challengerMap['id'];
+                setState(() {
+                  challengerName = challengerMap['name'];
+                });
+              }
+              // If your opponentID gets changed while challenging, deny the challenge by setting your opponentId to null
+              else {
                 await denyIncomingChallenge();
               }
-              final challengerMap = await supabase
-                  .from('players')
-                  .select('id, name')
-                  .eq('id', data['opponent_id'])
-                  .single();
-              challengerId = challengerMap['id'];
-              setState(() {
-                challengerName = challengerMap['name'];
-              });
             })
         .subscribe();
+  }
+
+  void changeToGamePage() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const GamePage()));
   }
 
   Future<void> denyIncomingChallenge() async {
@@ -161,11 +176,6 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
 
     await supabase.from('players').update(
         {'opponent_id': Player().id, 'duel_id': duelId}).eq('id', challengerId);
-
-    if (context.mounted) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const GamePage()));
-    }
   }
 
   void challengeAccepted() async {
@@ -173,8 +183,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
     Player().opponentName = challengedPlayerName;
 
     if (context.mounted) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const GamePage()));
+      changeToGamePage();
     }
   }
 

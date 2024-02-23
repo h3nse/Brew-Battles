@@ -24,7 +24,6 @@ class _GamePageState extends State<GamePage> {
       case GameState.ending:
         break;
     }
-
     return PopScope(
       canPop: false,
       child: Scaffold(

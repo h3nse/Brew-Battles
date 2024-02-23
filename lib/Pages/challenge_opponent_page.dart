@@ -1,6 +1,7 @@
 import 'package:brew_battles/Global/exceptions.dart';
 import 'package:brew_battles/Global/player.dart';
 import 'package:brew_battles/Pages/game_page.dart';
+import 'package:brew_battles/views/challenge_opponent_views.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -17,7 +18,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
   final opponentInputController = TextEditingController();
   int challengedPlayerId = 0;
   String challengedPlayerName = '';
-  bool challenging = false;
+  bool isChallenging = false;
   late RealtimeChannel opponentChannel;
   String challengerName = '';
   int challengerId = 0;
@@ -44,9 +45,9 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
                 });
                 return;
               }
-              if (challenging && data['opponent_id'] == challengedPlayerId) {
+              if (isChallenging && data['opponent_id'] == challengedPlayerId) {
                 challengeAccepted();
-              } else if (challenging) {
+              } else if (isChallenging) {
                 await supabase
                     .from('players')
                     .update({'opponent_id': null}).eq('id', Player().id);
@@ -80,7 +81,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
       throw BusyOpponentException('Player already has an opponent');
     }
     setState(() {
-      challenging = true;
+      isChallenging = true;
     });
     challengedPlayerId = challengedPlayer['id'];
     challengedPlayerName = opponentName;
@@ -98,7 +99,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
                 column: 'id',
                 value: challengedPlayer['id']),
             callback: (payload) {
-              if (payload.newRecord['opponent_id'] == null && challenging) {
+              if (payload.newRecord['opponent_id'] == null && isChallenging) {
                 cancelChallenge('Opponent rejected your challenge');
               }
             })
@@ -107,7 +108,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
 
   void cancelChallenge(String cancellationMessage) {
     setState(() {
-      challenging = false;
+      isChallenging = false;
     });
 
     supabase.removeChannel(opponentChannel);
@@ -165,107 +166,17 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
         title: const Text('Challenge Opponent Page'),
       ),
       body: Center(
-        child: (challengerName == '')
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text('Hello ${Player().name}!'),
-                  TextFormField(
-                    controller: opponentInputController,
-                    decoration: const InputDecoration(
-                        labelText: ("Enter an opponents name")),
-                  ),
-                  !challenging
-                      ? ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).colorScheme.primary),
-                            foregroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).colorScheme.onPrimary),
-                          ),
-                          onPressed: () async {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            String attemptedOpponent =
-                                opponentInputController.text;
-                            try {
-                              await challengeOpponent(attemptedOpponent);
-                            } on BusyOpponentException {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        "Player already has an opponent or is being challenged by another player"),
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-                              }
-                            } catch (_) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text("Couldn't find your opponent"),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          child: const Text('Challenge Opponent'),
-                        )
-                      : const Text('Waiting for opponent to accept...'),
-                  challenging
-                      ? ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).colorScheme.primary),
-                            foregroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).colorScheme.onPrimary),
-                          ),
-                          onPressed: () async {
-                            cancelChallenge('Challenge cancelled');
-                            await supabase
-                                .from('players')
-                                .update({'opponent_id': null}).eq(
-                                    'id', challengedPlayerId);
-                          },
-                          child: const Text('cancel'))
-                      : Container()
-                ],
-              )
-            : Column(
-                children: [
-                  Text('$challengerName has challenged you!'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).colorScheme.primary),
-                            foregroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).colorScheme.onPrimary),
-                          ),
-                          onPressed: () {
-                            rejectChallenge();
-                          },
-                          child: const Text('Reject')),
-                      ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).colorScheme.primary),
-                            foregroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).colorScheme.onPrimary),
-                          ),
-                          onPressed: () {
-                            acceptChallenge();
-                          },
-                          child: const Text('Accept'))
-                    ],
-                  )
-                ],
-              ),
-      ),
+          child: (challengerName == '')
+              ? MainView(
+                  opponentInputController: opponentInputController,
+                  isChallenging: isChallenging,
+                  challengeOpponent: challengeOpponent,
+                  cancelChallenge: cancelChallenge,
+                  challengedPlayerId: challengedPlayerId)
+              : IncomingChallengeView(
+                  challengerName: challengerName,
+                  rejectChallenge: rejectChallenge,
+                  acceptChallenge: acceptChallenge)),
     );
   }
 }

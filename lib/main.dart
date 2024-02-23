@@ -1,7 +1,9 @@
+import 'package:brew_battles/Managers/game_manager.dart';
 import 'package:brew_battles/Pages/front_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
@@ -9,7 +11,10 @@ Future<void> main() async {
   final supabaseKey = dotenv.env['SUPABASE_KEY']!;
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
-  runApp(const MainApp());
+  runApp(MultiProvider(
+    providers: [ChangeNotifierProvider(create: (_) => GameManager())],
+    child: const MainApp(),
+  )); // Might impact performance? Move further down the tree.
 }
 
 class MainApp extends StatelessWidget {

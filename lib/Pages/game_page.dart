@@ -4,8 +4,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 final supabase = Supabase.instance.client;
 
-enum GameState { starting, running, ending }
-
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
 
@@ -14,7 +12,7 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  GameState gameState = GameState.starting;
+  String gameState = 'starting';
 
   @override
   void initState() {
@@ -22,17 +20,39 @@ class _GamePageState extends State<GamePage> {
     subscribeToDuelsTable();
   }
 
-  void subscribeToDuelsTable() {}
+  void subscribeToDuelsTable() {
+    supabase
+        .channel('duel')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'duels',
+          filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'id',
+              value: Player().duelId),
+          callback: (payload) {
+            final data = payload.newRecord;
+
+            if (data['gamestate'] != gameState) {
+              setState(() {
+                gameState = data['gamestate'];
+              });
+            }
+          },
+        )
+        .subscribe();
+  }
 
   @override
   Widget build(BuildContext context) {
     Widget view = const Placeholder();
     switch (gameState) {
-      case GameState.starting:
+      case 'starting':
         break;
-      case GameState.running:
+      case 'running':
         view = const GameRunningView();
-      case GameState.ending:
+      case 'ending':
         break;
     }
     return PopScope(

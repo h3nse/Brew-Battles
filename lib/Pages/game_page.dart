@@ -16,16 +16,15 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  late final GameManager gameManager;
-
   @override
   void initState() {
     super.initState();
-    gameManager = Provider.of<GameManager>(context, listen: false);
     subscribeToDuelsTable();
   }
 
   void subscribeToDuelsTable() {
+    final GameManager gameManager =
+        Provider.of<GameManager>(context, listen: false);
     supabase
         .channel('duel')
         .onPostgresChanges(
@@ -38,7 +37,6 @@ class _GamePageState extends State<GamePage> {
               value: Player().duelId),
           callback: (payload) {
             final data = payload.newRecord;
-
             if (data['gamestate'] != gameManager.gamestate) {
               gameManager.changeGamestate(data['gamestate']);
             }
@@ -48,7 +46,6 @@ class _GamePageState extends State<GamePage> {
   }
 
   void changeGamestate(String gamestate) async {
-    gameManager.changeGamestate(gamestate);
     await supabase
         .from('duels')
         .update({'gamestate': gamestate}).eq('id', Player().duelId);
@@ -56,22 +53,24 @@ class _GamePageState extends State<GamePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget view = const Placeholder();
-    switch (gameManager.gamestate) {
-      case 'starting':
-        view = GameStartingView(changeGamestate: changeGamestate);
-        break;
-      case 'running':
-        view = const GameRunningView();
-        break;
-      case 'ending':
-        break;
-    }
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        body: Center(child: view),
-      ),
+      child: Scaffold(body: Consumer<GameManager>(
+        builder: (context, gameManager, child) {
+          Widget view = const Placeholder();
+          switch (gameManager.gamestate) {
+            case 'starting':
+              view = GameStartingView(changeGamestate: changeGamestate);
+              break;
+            case 'running':
+              view = const GameRunningView();
+              break;
+            case 'ending':
+              break;
+          }
+          return view;
+        },
+      )),
     );
   }
 }
@@ -95,7 +94,9 @@ class _GameStartingViewState extends State<GameStartingView> {
         style: const TextStyle(fontSize: 24),
       ),
       onFinished: () {
-        widget.changeGamestate('Running');
+        if (Player().isManager) {
+          widget.changeGamestate('running');
+        }
       },
     ));
   }

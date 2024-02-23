@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class GameManager extends ChangeNotifier {
-  String _gamestate = '';
+  String _gamestate = 'starting';
 
   String get gamestate => _gamestate;
 

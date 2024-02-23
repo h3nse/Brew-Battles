@@ -43,6 +43,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
 
               // If your duelId gets changed while you're challenging, call challenge accepted
               if (data['duel_id'] != null && isChallenging) {
+                Player().duelId = data['duel_id'];
                 challengeAccepted();
               }
               // If your duelId gets changed while you're not challenging, switch screen to game_page
@@ -168,7 +169,9 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
     Player().opponentName = challengerName;
     Player().duelId = duelId;
 
-    await supabase.from('duels').insert({'id': duelId});
+    await supabase
+        .from('duels')
+        .insert({'id': duelId, 'gamestate': 'starting'});
 
     await supabase
         .from('players')
@@ -181,6 +184,7 @@ class _ChallengeOpponentPageState extends State<ChallengeOpponentPage> {
   void challengeAccepted() async {
     Player().opponentId = challengedPlayerId;
     Player().opponentName = challengedPlayerName;
+    Player().isManager = true;
 
     if (context.mounted) {
       changeToGamePage();

@@ -10,6 +10,38 @@ class WizardView extends StatefulWidget {
 class _WizardViewState extends State<WizardView> {
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Wizard View'));
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        GestureDetector(
+          onTap: () {
+            print('Left Wizard Tapped');
+          },
+          child: SizedBox(
+            height: 100,
+            width: 100,
+            child: Container(
+              decoration: BoxDecoration(
+                  border: Border.all(width: 2, color: Colors.purple)),
+              child: const Center(child: Text('Left Wizard')),
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            print('Right Wizard Tapped');
+          },
+          child: SizedBox(
+            height: 100,
+            width: 100,
+            child: Container(
+              decoration: BoxDecoration(
+                  border: Border.all(width: 2, color: Colors.purple)),
+              child: const Center(child: Text('Right Wizard')),
+            ),
+          ),
+        )
+      ],
+    );
   }
 }

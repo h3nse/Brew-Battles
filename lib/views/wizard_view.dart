@@ -10,6 +10,6 @@ class WizardView extends StatefulWidget {
 class _WizardViewState extends State<WizardView> {
   @override
   Widget build(BuildContext context) {
-    return const Text('Wizard View');
+    return const Center(child: Text('Wizard View'));
   }
 }

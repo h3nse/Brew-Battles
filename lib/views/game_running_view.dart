@@ -9,11 +9,13 @@ class GameRunningView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Expanded(flex: 1, child: Center(child: WizardView())),
-        Expanded(flex: 2, child: Center(child: PotionView()))
-      ],
+    return const Center(
+      child: Column(
+        children: [
+          Expanded(flex: 1, child: WizardView()),
+          Expanded(flex: 2, child: PotionView())
+        ],
+      ),
     );
   }
 }

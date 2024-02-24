@@ -117,4 +117,7 @@ class Constants {
       'Snot',
     ]
   };
+
+  static const int msPotionShakeInterval = 2000;
+  static const int potionShakeThreshold = 10;
 }

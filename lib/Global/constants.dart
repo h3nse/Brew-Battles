@@ -118,6 +118,8 @@ class Constants {
     ]
   };
 
+  static const int initialHealth = 100;
+
   static const Map<int, String> idToIngredients = {
     1: 'Phoenix Feather Fern',
     2: 'Ember Crystal',
@@ -165,11 +167,13 @@ class Constants {
   static const Map<int, List> potionEffects = {
     0: [],
     1: [
-      ['Damage', -2]
+      ['Damage', 10]
     ],
     2: [],
     3: [],
     4: [],
-    5: [],
+    5: [
+      ['Heal', 10]
+    ],
   };
 }

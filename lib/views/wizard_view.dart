@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
 import 'package:flutter/material.dart';
@@ -15,23 +17,24 @@ class _WizardViewState extends State<WizardView> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final gameManager = Provider.of<GameManager>(context, listen: false);
-      gameManager.changePlayerHealth(100);
-      gameManager.changeOpponentHealth(100);
+      gameManager.changePlayerHealth(Constants.initialHealth);
+      gameManager.changeOpponentHealth(Constants.initialHealth);
     });
     super.initState();
   }
 
-  void takeDamage(int damage) {
-    final gameManager = Provider.of<GameManager>(context, listen: false);
-    gameManager.changePlayerHealth(gameManager.playerHealth + damage);
-  }
-
-  void handlePotion(int potion) {
+  void handlePotion(GameManager gameManager, int potion) {
     final effects = Constants.potionEffects[potion];
     for (var effect in effects!) {
       switch (effect[0]) {
         case 'Damage':
-          takeDamage(effect[1]);
+          gameManager.changePlayerHealth(
+              (gameManager.playerHealth - effect[1]).toInt());
+          break;
+        case 'Heal':
+          gameManager.changePlayerHealth(min(Constants.initialHealth,
+              (gameManager.playerHealth + effect[1]).toInt()));
+          break;
       }
     }
   }
@@ -50,7 +53,7 @@ class _WizardViewState extends State<WizardView> {
                 if (gameManager.potionState != 'finished') {
                   return;
                 }
-                handlePotion(gameManager.finishedPotion);
+                handlePotion(gameManager, gameManager.finishedPotion);
                 gameManager.emptyPotion();
                 print('Left Wizard Tapped');
               },
@@ -88,7 +91,7 @@ class _WizardViewState extends State<WizardView> {
                       child: Column(
                     children: [
                       const Text('Right Wizard'),
-                      Text('Health: ${gameManager.playerHealth}')
+                      Text('Health: ${gameManager.opponentHealth}')
                     ],
                   )),
                 ),

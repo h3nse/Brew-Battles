@@ -4,6 +4,7 @@ import 'package:brew_battles/Global/constants.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
+import 'package:collection/collection.dart';
 
 class EmptyPotion extends StatefulWidget {
   const EmptyPotion({super.key});
@@ -54,6 +55,21 @@ class _MixingPotionState extends State<MixingPotion> {
     super.dispose();
   }
 
+  void createPotion() {
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+    final ingredients = gameManager.ingredients;
+    ingredients.sort();
+    Function eq = const ListEquality().equals;
+    String potion = 'Default Potion';
+    for (var i = 0; i < Constants.potions.length - 1; i++) {
+      if (eq(Constants.potions[i][1], ingredients)) {
+        potion = Constants.potions[i][0];
+        break;
+      }
+    }
+    gameManager.changeFinishedPotion(potion);
+  }
+
   @override
   void initState() {
     accelerometerSubscription = userAccelerometerEventStream(
@@ -66,6 +82,7 @@ class _MixingPotionState extends State<MixingPotion> {
         final gameManager = Provider.of<GameManager>(context, listen: false);
         gameManager.increaseMixLevel(1);
         if (gameManager.mixLevel >= Constants.maxMixLevel) {
+          createPotion();
           gameManager.changePotionState('finished');
         }
       }
@@ -88,11 +105,11 @@ class FinishedPotion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration:
-          BoxDecoration(border: Border.all(width: 2, color: Colors.purple)),
-      child: const Center(
-        child: Text('Finished Potion'),
+    return Center(
+      child: Consumer<GameManager>(
+        builder: (context, gameManager, child) {
+          return Text(gameManager.finishedPotion);
+        },
       ),
     );
   }

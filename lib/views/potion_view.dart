@@ -63,8 +63,7 @@ class _PotionViewState extends State<PotionView> {
                           if (ingredientId != null &&
                               ingredientId <=
                                   Constants.idToIngredients.length) {
-                            gameManager.addIngredient(
-                                Constants.idToIngredients[ingredientId]!);
+                            gameManager.addIngredient(ingredientId);
                           }
                         }
                       },
@@ -78,6 +77,7 @@ class _PotionViewState extends State<PotionView> {
                       ),
                       onPressed: () {
                         gameManager.emptyIngredients();
+                        gameManager.changeFinishedPotion('');
                         gameManager.resetMixLevel();
                         gameManager.changePotionState('empty');
                       },

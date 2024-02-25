@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 class GameManager extends ChangeNotifier {
   String _gamestate = 'starting';
   String _potionState = 'empty';
-  List<String> _ingredients = [];
+  List<int> _ingredients = [];
   int _mixLevel = 0;
+  String _finishedPotion = '';
 
   String get gamestate => _gamestate;
   String get potionState => _potionState;
-  List<String> get ingredients => _ingredients;
+  List<int> get ingredients => _ingredients;
   int get mixLevel => _mixLevel;
+  String get finishedPotion => _finishedPotion;
 
   void changeGamestate(String value) {
     _gamestate = value;
@@ -21,7 +23,7 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addIngredient(String ingredient) {
+  void addIngredient(int ingredient) {
     _ingredients.add(ingredient);
     notifyListeners();
   }
@@ -38,6 +40,11 @@ class GameManager extends ChangeNotifier {
 
   void resetMixLevel() {
     _mixLevel = 0;
+    notifyListeners();
+  }
+
+  void changeFinishedPotion(String value) {
+    _finishedPotion = value;
     notifyListeners();
   }
 }

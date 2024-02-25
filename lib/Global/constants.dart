@@ -123,10 +123,33 @@ class Constants {
     2: 'Ember Crystal',
     3: 'Shadowroot',
     4: 'Moonstone Nectar',
-    5: 'Dragons Tounge'
+    5: 'Dragon\'s Tounge'
   };
 
   static const int msPotionShakeInterval = 2000;
   static const int potionShakeThreshold = 10;
   static const int maxMixLevel = 10;
+
+  static const List<List> potions = [
+    [
+      'Elixir of Eternal Flames',
+      [1, 2, 5]
+    ],
+    [
+      'Potion of The Shadowbound',
+      [3, 4]
+    ],
+    [
+      'Celestial Frost Potion',
+      [2, 4]
+    ],
+    [
+      'Potion of Venom',
+      [3, 4, 5]
+    ],
+    [
+      'Dragonhearts Brew',
+      [1, 5]
+    ],
+  ];
 }

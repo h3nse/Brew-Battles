@@ -30,7 +30,12 @@ class _EmptyPotionState extends State<EmptyPotion> {
           children: [
             const Text('Empty Potion'),
             Consumer<GameManager>(builder: (context, gameManager, child) {
-              return Text('Ingredients: ${gameManager.ingredients.toString()}');
+              List<String> namedIngredients = [];
+              final ingredientIds = gameManager.ingredients;
+              for (var i in ingredientIds) {
+                namedIngredients.add(Constants.idToIngredients[i]!);
+              }
+              return Text('Ingredients: $namedIngredients');
             })
           ],
         )),
@@ -61,7 +66,7 @@ class _MixingPotionState extends State<MixingPotion> {
     ingredients.sort();
     Function eq = const ListEquality().equals;
     String potion = 'Default Potion';
-    for (var i = 0; i < Constants.potions.length - 1; i++) {
+    for (var i = 0; i < Constants.potions.length; i++) {
       if (eq(Constants.potions[i][1], ingredients)) {
         potion = Constants.potions[i][0];
         break;

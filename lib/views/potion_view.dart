@@ -76,10 +76,7 @@ class _PotionViewState extends State<PotionView> {
                             Theme.of(context).colorScheme.onPrimary),
                       ),
                       onPressed: () {
-                        gameManager.emptyIngredients();
-                        gameManager.changeFinishedPotion('');
-                        gameManager.resetMixLevel();
-                        gameManager.changePotionState('empty');
+                        gameManager.emptyPotion();
                       },
                       child: const Text('Pour Potion Out'))
                 ],

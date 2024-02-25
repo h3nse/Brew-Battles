@@ -5,13 +5,17 @@ class GameManager extends ChangeNotifier {
   String _potionState = 'empty';
   List<int> _ingredients = [];
   int _mixLevel = 0;
-  String _finishedPotion = '';
+  int _finishedPotionId = 0;
+  int _playerHealth = 0;
+  int _opponentHealth = 0;
 
   String get gamestate => _gamestate;
   String get potionState => _potionState;
   List<int> get ingredients => _ingredients;
   int get mixLevel => _mixLevel;
-  String get finishedPotion => _finishedPotion;
+  int get finishedPotion => _finishedPotionId;
+  int get playerHealth => _playerHealth;
+  int get opponentHealth => _opponentHealth;
 
   void changeGamestate(String value) {
     _gamestate = value;
@@ -43,8 +47,25 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeFinishedPotion(String value) {
-    _finishedPotion = value;
+  void changeFinishedPotionId(int value) {
+    _finishedPotionId = value;
+    notifyListeners();
+  }
+
+  void emptyPotion() {
+    changePotionState('empty');
+    emptyIngredients();
+    resetMixLevel();
+    changeFinishedPotionId(0);
+  }
+
+  void changePlayerHealth(int health) {
+    _playerHealth = health;
+    notifyListeners();
+  }
+
+  void changeOpponentHealth(int health) {
+    _opponentHealth = health;
     notifyListeners();
   }
 }

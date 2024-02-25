@@ -126,30 +126,50 @@ class Constants {
     5: 'Dragon\'s Tounge'
   };
 
+  static const Map<int, String> idToPotions = {
+    0: 'Default Potion',
+    1: 'Elixir of Eternal Flames',
+    2: 'Potion of The Shadowbound',
+    3: 'Celestial Frost Potion',
+    4: 'Potion of Venom',
+    5: 'Dragonhearts Brew',
+  };
+
   static const int msPotionShakeInterval = 2000;
   static const int potionShakeThreshold = 10;
   static const int maxMixLevel = 10;
 
   static const List<List> potions = [
     [
-      'Elixir of Eternal Flames',
+      1,
       [1, 2, 5]
     ],
     [
-      'Potion of The Shadowbound',
+      2,
       [3, 4]
     ],
     [
-      'Celestial Frost Potion',
+      3,
       [2, 4]
     ],
     [
-      'Potion of Venom',
+      4,
       [3, 4, 5]
     ],
     [
-      'Dragonhearts Brew',
+      5,
       [1, 5]
     ],
   ];
+
+  static const Map<int, List> potionEffects = {
+    0: [],
+    1: [
+      ['Damage', -2]
+    ],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+  };
 }

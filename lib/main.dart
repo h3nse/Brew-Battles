@@ -10,7 +10,11 @@ Future<void> main() async {
   const supabaseUrl = 'https://jcwxzybnrickofvzkgge.supabase.co';
   final supabaseKey = dotenv.env['SUPABASE_KEY']!;
 
-  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+  await Supabase.initialize(
+      url: supabaseUrl,
+      anonKey: supabaseKey,
+      realtimeClientOptions: const RealtimeClientOptions(
+          eventsPerSecond: 10)); // Change eventsPerSecond to sync more often
   runApp(MultiProvider(
     providers: [ChangeNotifierProvider(create: (_) => GameManager())],
     child: const MainApp(),

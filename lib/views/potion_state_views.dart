@@ -65,14 +65,14 @@ class _MixingPotionState extends State<MixingPotion> {
     final ingredients = gameManager.ingredients;
     ingredients.sort();
     Function eq = const ListEquality().equals;
-    String potion = 'Default Potion';
+    int potionId = 0;
     for (var i = 0; i < Constants.potions.length; i++) {
       if (eq(Constants.potions[i][1], ingredients)) {
-        potion = Constants.potions[i][0];
+        potionId = Constants.potions[i][0];
         break;
       }
     }
-    gameManager.changeFinishedPotion(potion);
+    gameManager.changeFinishedPotionId(potionId);
   }
 
   @override
@@ -113,7 +113,7 @@ class FinishedPotion extends StatelessWidget {
     return Center(
       child: Consumer<GameManager>(
         builder: (context, gameManager, child) {
-          return Text(gameManager.finishedPotion);
+          return Text(Constants.idToPotions[gameManager.finishedPotion]!);
         },
       ),
     );

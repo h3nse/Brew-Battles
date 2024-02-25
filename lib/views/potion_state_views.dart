@@ -23,7 +23,16 @@ class _EmptyPotionState extends State<EmptyPotion> {
       child: Container(
         decoration:
             BoxDecoration(border: Border.all(width: 2, color: Colors.purple)),
-        child: const Center(child: Text('Empty Potion')),
+        child: Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Empty Potion'),
+            Consumer<GameManager>(builder: (context, gameManager, child) {
+              return Text('Ingredients: ${gameManager.ingredients.toString()}');
+            })
+          ],
+        )),
       ),
     );
   }

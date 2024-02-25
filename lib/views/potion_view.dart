@@ -1,4 +1,6 @@
+import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
+import 'package:brew_battles/Pages/Scanner/barcode_scanner.dart';
 import 'package:brew_battles/views/potion_state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -48,8 +50,23 @@ class _PotionViewState extends State<PotionView> {
                                   MaterialStateProperty.all<Color>(Colors.grey),
                               foregroundColor: MaterialStateProperty.all<Color>(
                                   Colors.black)),
-                      onPressed: () {
-                        print('Scan Ingredient Tapped');
+                      onPressed: () async {
+                        String? result =
+                            await Navigator.of(context).push<String>(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const BarcodeScannerWithoutController(),
+                          ),
+                        );
+                        if (result != null) {
+                          final ingredientId = int.tryParse(result);
+                          if (ingredientId != null &&
+                              ingredientId <=
+                                  Constants.idToIngredients.length) {
+                            gameManager.addIngredient(
+                                Constants.idToIngredients[ingredientId]!);
+                          }
+                        }
                       },
                       child: const Text('Scan Ingredient')),
                   ElevatedButton(

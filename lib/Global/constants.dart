@@ -118,6 +118,14 @@ class Constants {
     ]
   };
 
+  static const Map<int, String> idToIngredients = {
+    1: 'Phoenix Feather Fern',
+    2: 'Ember Crystal',
+    3: 'Shadowroot',
+    4: 'Moonstone Nectar',
+    5: 'Dragons Tounge'
+  };
+
   static const int msPotionShakeInterval = 2000;
   static const int potionShakeThreshold = 10;
   static const int maxMixLevel = 10;

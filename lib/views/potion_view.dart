@@ -13,47 +13,62 @@ class PotionView extends StatefulWidget {
 class _PotionViewState extends State<PotionView> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Consumer<GameManager>(
-            builder: (context, gameManager, child) {
-              Widget potion = const Placeholder();
-              switch (gameManager.potionState) {
-                case 'empty':
-                  potion = const EmptyPotion();
-                  break;
-                case 'mixing':
-                  potion = const MixingPotion();
-                  break;
-                case 'finished':
-                  potion = const SizedBox(
-                      height: 300, width: 300, child: Placeholder());
-              }
-              return potion;
-            },
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                    print('Scan Ingredient Tapped');
-                  },
-                  child: const Text('Scan Ingredient')),
-              ElevatedButton(
-                  onPressed: () {
-                    print('Pour Potion Out Tapped');
-                  },
-                  child: const Text('Pour Potion Out'))
-            ],
-          ),
-        )
-      ],
+    return Consumer<GameManager>(
+      builder: (context, gameManager, child) {
+        Widget potion = const Placeholder();
+        switch (gameManager.potionState) {
+          case 'empty':
+            potion = const EmptyPotion();
+            break;
+          case 'mixing':
+            potion = const MixingPotion();
+            break;
+          case 'finished':
+            potion =
+                const SizedBox(height: 300, width: 300, child: Placeholder());
+        }
+        return Column(
+          children: [
+            Expanded(flex: 3, child: potion),
+            Expanded(
+              flex: 1,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                      style: (gameManager.potionState == 'empty')
+                          ? ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Theme.of(context).colorScheme.primary),
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                  Theme.of(context).colorScheme.onPrimary),
+                            )
+                          : ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all<Color>(Colors.grey),
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.black)),
+                      onPressed: () {
+                        print('Scan Ingredient Tapped');
+                      },
+                      child: const Text('Scan Ingredient')),
+                  ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Theme.of(context).colorScheme.primary),
+                        foregroundColor: MaterialStateProperty.all<Color>(
+                            Theme.of(context).colorScheme.onPrimary),
+                      ),
+                      onPressed: () {
+                        print('Pour Potion Out Tapped');
+                      },
+                      child: const Text('Pour Potion Out'))
+                ],
+              ),
+            )
+          ],
+        );
+      },
     );
   }
 }

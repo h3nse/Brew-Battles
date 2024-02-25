@@ -24,8 +24,8 @@ class _PotionViewState extends State<PotionView> {
             potion = const MixingPotion();
             break;
           case 'finished':
-            potion =
-                const SizedBox(height: 300, width: 300, child: Placeholder());
+            potion = const FinishedPotion();
+            break;
         }
         return Column(
           children: [
@@ -60,7 +60,9 @@ class _PotionViewState extends State<PotionView> {
                             Theme.of(context).colorScheme.onPrimary),
                       ),
                       onPressed: () {
-                        print('Pour Potion Out Tapped');
+                        gameManager.emptyIngredients();
+                        gameManager.resetMixLevel();
+                        gameManager.changePotionState('empty');
                       },
                       child: const Text('Pour Potion Out'))
                 ],

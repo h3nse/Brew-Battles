@@ -120,5 +120,5 @@ class Constants {
 
   static const int msPotionShakeInterval = 2000;
   static const int potionShakeThreshold = 10;
-  static const int maxMixLevel = 20;
+  static const int maxMixLevel = 10;
 }

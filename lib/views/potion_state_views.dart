@@ -23,7 +23,7 @@ class _EmptyPotionState extends State<EmptyPotion> {
       child: Container(
         decoration:
             BoxDecoration(border: Border.all(width: 2, color: Colors.purple)),
-        child: const Center(child: Text('Potion')),
+        child: const Center(child: Text('Empty Potion')),
       ),
     );
   }
@@ -57,7 +57,7 @@ class _MixingPotionState extends State<MixingPotion> {
         final gameManager = Provider.of<GameManager>(context, listen: false);
         gameManager.increaseMixLevel(1);
         if (gameManager.mixLevel >= Constants.maxMixLevel) {
-          gameManager.changeGamestate('finished');
+          gameManager.changePotionState('finished');
         }
       }
     });
@@ -70,6 +70,21 @@ class _MixingPotionState extends State<MixingPotion> {
       child: Consumer<GameManager>(builder: (context, gameManager, child) {
         return Text('${gameManager.mixLevel}');
       }),
+    );
+  }
+}
+
+class FinishedPotion extends StatelessWidget {
+  const FinishedPotion({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration:
+          BoxDecoration(border: Border.all(width: 2, color: Colors.purple)),
+      child: const Center(
+        child: Text('Finished Potion'),
+      ),
     );
   }
 }

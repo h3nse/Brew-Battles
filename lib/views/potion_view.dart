@@ -28,7 +28,8 @@ class _PotionViewState extends State<PotionView> {
                   potion = const MixingPotion();
                   break;
                 case 'finished':
-                  potion = const Placeholder();
+                  potion = const SizedBox(
+                      height: 300, width: 300, child: Placeholder());
               }
               return potion;
             },

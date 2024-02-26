@@ -33,12 +33,20 @@ class _WizardViewState extends State<WizardView> {
             callback: (payload) =>
                 updateHealth(gameManager, false, payload['amount']))
         .subscribe();
+    _duelChannel.onBroadcast(
+        event: 'potion',
+        callback: (payload) => handlePotion(gameManager, payload['potionId']));
     super.initState();
   }
 
   void notifyHealthChange(int amount) {
     _duelChannel.sendBroadcastMessage(
         event: 'health_update', payload: {'amount': amount});
+  }
+
+  void notifyPotionThrow(int potionId) {
+    _duelChannel
+        .sendBroadcastMessage(event: 'potion', payload: {'potionId': potionId});
   }
 
   void updateHealth(GameManager gameManager, bool self, int amount) {
@@ -65,7 +73,10 @@ class _WizardViewState extends State<WizardView> {
     }
   }
 
-  void throwPotion() {}
+  void throwPotion(int potionId) {
+    // Add animation etc.
+    notifyPotionThrow(potionId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +92,6 @@ class _WizardViewState extends State<WizardView> {
                 }
                 handlePotion(gameManager, gameManager.finishedPotion);
                 gameManager.emptyPotion();
-                print('Left Wizard Tapped');
               },
               child: SizedBox(
                 height: 100,
@@ -104,8 +114,8 @@ class _WizardViewState extends State<WizardView> {
                 if (gameManager.potionState != 'finished') {
                   return;
                 }
-                throwPotion();
-                print('Right Wizard Tapped');
+                throwPotion(gameManager.finishedPotion);
+                gameManager.emptyPotion();
               },
               child: SizedBox(
                 height: 100,

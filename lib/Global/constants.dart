@@ -137,9 +137,9 @@ class Constants {
     5: 'Dragonhearts Brew',
   };
 
-  static const int msPotionShakeInterval = 2000;
-  static const int potionShakeThreshold = 10;
-  static const int maxMixLevel = 10;
+  static const int msPotionShakeInterval = 500;
+  static const int potionShakeThreshold = 5;
+  static const int maxMixLevel = 2;
 
   static const List<List> potions = [
     [

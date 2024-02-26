@@ -9,15 +9,12 @@ class GameEndingView extends StatelessWidget {
 
   final String winner;
 
-  void resetOpponent() async {
-    // await supabase.from('duels').delete().eq('id', Player().duelId);
-    // await supabase
-    //     .from('players')
-    //     .update({'opponent_id': null}).eq('id', Player().id);
-    // Player().opponentId = 0;
-    // Player().opponentName = '';
-    // Player().duelId = 0;
-    // Player().isManager = false;
+  void fullReset() async {
+    await supabase.from('duels').delete().eq('id', Player().duelId);
+    Player().opponentId = 0;
+    Player().opponentName = '';
+    Player().duelId = 0;
+    Player().isManager = false;
   }
 
   @override
@@ -34,7 +31,7 @@ class GameEndingView extends StatelessWidget {
               child: const Text('Play Again')),
           ElevatedButton(
               onPressed: () {
-                resetOpponent();
+                fullReset();
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
               child: const Text('Back to Menu'))

@@ -144,7 +144,7 @@ class Constants {
   static const List<List> potions = [
     [
       1,
-      [1, 2, 5]
+      [1]
     ],
     [
       2,
@@ -167,7 +167,7 @@ class Constants {
   static const Map<int, List> potionEffects = {
     0: [],
     1: [
-      ['Damage', 100]
+      ['Damage', 50]
     ],
     2: [],
     3: [],

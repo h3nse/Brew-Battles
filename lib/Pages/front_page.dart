@@ -58,7 +58,7 @@ class FrontPage extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const ChallengeOpponentPage()));
+                      builder: (context) => const ChallengePage()));
             },
             child: const Text('Play')),
       ),

@@ -1,5 +1,6 @@
 import 'package:brew_battles/Global/player.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
+import 'package:brew_battles/views/game_ending_view.dart';
 import 'package:brew_battles/views/game_running_view.dart';
 import 'package:brew_battles/views/game_starting_view.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,7 @@ class _GamePageState extends State<GamePage> {
     final GameManager gameManager =
         Provider.of<GameManager>(context, listen: false);
     supabase
-        .channel('duel')
+        .channel('gamestate')
         .onPostgresChanges(
           event: PostgresChangeEvent.update,
           schema: 'public',
@@ -66,6 +67,7 @@ class _GamePageState extends State<GamePage> {
               view = const GameRunningView();
               break;
             case 'ending':
+              view = GameEndingView(winner: gameManager.winner);
               break;
           }
           return view;

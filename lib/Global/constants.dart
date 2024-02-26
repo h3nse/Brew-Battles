@@ -167,7 +167,7 @@ class Constants {
   static const Map<int, List> potionEffects = {
     0: [],
     1: [
-      ['Damage', 10]
+      ['Damage', 100]
     ],
     2: [],
     3: [],
@@ -176,4 +176,6 @@ class Constants {
       ['Heal', 10]
     ],
   };
+
+  static const int endDurationSec = 5;
 }

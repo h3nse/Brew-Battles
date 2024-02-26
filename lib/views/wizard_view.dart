@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:brew_battles/Global/constants.dart';
+import 'package:brew_battles/Global/player.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +19,8 @@ class WizardView extends StatefulWidget {
 
 class _WizardViewState extends State<WizardView> {
   late final RealtimeChannel _duelChannel;
+  bool playerDead = false;
+  bool opponentDead = false;
 
   @override
   void initState() {
@@ -26,7 +30,7 @@ class _WizardViewState extends State<WizardView> {
       gameManager.changeOpponentHealth(Constants.initialHealth);
     });
 
-    _duelChannel = supabase.channel('duel');
+    _duelChannel = supabase.channel('update');
     _duelChannel
         .onBroadcast(
             event: 'health_update',
@@ -36,6 +40,8 @@ class _WizardViewState extends State<WizardView> {
     _duelChannel.onBroadcast(
         event: 'potion',
         callback: (payload) => handlePotion(gameManager, payload['potionId']));
+    _duelChannel.onBroadcast(
+        event: 'death', callback: (payload) => wizardDied(false));
     super.initState();
   }
 
@@ -49,13 +55,23 @@ class _WizardViewState extends State<WizardView> {
         .sendBroadcastMessage(event: 'potion', payload: {'potionId': potionId});
   }
 
-  void updateHealth(GameManager gameManager, bool self, int amount) {
+  void notifyDeath() {
+    _duelChannel.sendBroadcastMessage(event: 'death', payload: {});
+  }
+
+  void updateHealth(GameManager gameManager, bool self, int health) {
     if (self) {
-      gameManager.changePlayerHealth(
-          min(Constants.initialHealth, gameManager.playerHealth + amount));
-      notifyHealthChange(amount);
+      final newHealth = max(
+          0,
+          min(Constants.initialHealth,
+              health)); // Limit health between 0 and initial health
+      gameManager.changePlayerHealth(newHealth);
+      notifyHealthChange(newHealth);
+      if (newHealth == 0) {
+        wizardDied(true);
+      }
     } else {
-      gameManager.changeOpponentHealth(gameManager.opponentHealth + amount);
+      gameManager.changeOpponentHealth(health);
     }
   }
 
@@ -64,7 +80,8 @@ class _WizardViewState extends State<WizardView> {
     for (var effect in effects!) {
       switch (effect[0]) {
         case 'Damage':
-          updateHealth(gameManager, true, -effect[1]);
+          updateHealth(gameManager, true,
+              (gameManager.playerHealth - effect[1]).toInt());
           break;
         case 'Heal':
           updateHealth(gameManager, true, effect[1]);
@@ -76,6 +93,37 @@ class _WizardViewState extends State<WizardView> {
   void throwPotion(int potionId) {
     // Add animation etc.
     notifyPotionThrow(potionId);
+  }
+
+  void wizardDied(bool self) {
+    String winner;
+    if (self) {
+      notifyDeath();
+      winner = Player().name;
+      setState(() {
+        playerDead = true;
+      });
+    } else {
+      winner = Player().opponentName;
+      setState(() {
+        opponentDead = true;
+      });
+    }
+    Provider.of<GameManager>(context, listen: false).changeWinner(winner);
+    Timer(const Duration(seconds: Constants.endDurationSec), () {
+      endGame();
+    });
+  }
+
+  void endGame() async {
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+    gameManager.emptyPotion();
+
+    if (Player().isManager) {
+      await supabase
+          .from('duels')
+          .update({'gamestate': 'ending'}).eq('id', Player().duelId);
+    }
   }
 
   @override
@@ -100,12 +148,14 @@ class _WizardViewState extends State<WizardView> {
                   decoration: BoxDecoration(
                       border: Border.all(width: 2, color: Colors.purple)),
                   child: Center(
-                      child: Column(
-                    children: [
-                      const Text('Left Wizard'),
-                      Text('Health: ${gameManager.playerHealth}')
-                    ],
-                  )),
+                      child: (!playerDead)
+                          ? Column(
+                              children: [
+                                const Text('Left Wizard'),
+                                Text('Health: ${gameManager.playerHealth}')
+                              ],
+                            )
+                          : const Text('Dead')),
                 ),
               ),
             ),
@@ -124,12 +174,14 @@ class _WizardViewState extends State<WizardView> {
                   decoration: BoxDecoration(
                       border: Border.all(width: 2, color: Colors.purple)),
                   child: Center(
-                      child: Column(
-                    children: [
-                      const Text('Right Wizard'),
-                      Text('Health: ${gameManager.opponentHealth}')
-                    ],
-                  )),
+                      child: (!opponentDead)
+                          ? Column(
+                              children: [
+                                const Text('Right Wizard'),
+                                Text('Health: ${gameManager.opponentHealth}')
+                              ],
+                            )
+                          : const Text('Dead')),
                 ),
               ),
             )

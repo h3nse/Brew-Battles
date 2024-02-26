@@ -8,6 +8,7 @@ class GameManager extends ChangeNotifier {
   int _finishedPotionId = 0;
   int _playerHealth = 0;
   int _opponentHealth = 0;
+  String _winner = '';
 
   String get gamestate => _gamestate;
   String get potionState => _potionState;
@@ -16,6 +17,7 @@ class GameManager extends ChangeNotifier {
   int get finishedPotion => _finishedPotionId;
   int get playerHealth => _playerHealth;
   int get opponentHealth => _opponentHealth;
+  String get winner => _winner;
 
   void changeGamestate(String value) {
     _gamestate = value;
@@ -66,6 +68,11 @@ class GameManager extends ChangeNotifier {
 
   void changeOpponentHealth(int health) {
     _opponentHealth = health;
+    notifyListeners();
+  }
+
+  void changeWinner(String winner) {
+    _winner = winner;
     notifyListeners();
   }
 }

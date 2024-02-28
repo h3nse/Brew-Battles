@@ -122,4 +122,13 @@ class GameManager extends ChangeNotifier {
     _opponentActionText = value;
     notifyListeners();
   }
+
+  void resetAll() {
+    emptyPotion();
+    _playerActiveEffects.clear();
+    _opponentActiveEffects.clear();
+    // Remove later
+    setPlayerActionText('');
+    setOpponentActionText('');
+  }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:brew_battles/Global/constants.dart';
+import 'package:brew_battles/Global/player.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -135,6 +136,8 @@ class _NewWizardViewState extends State<NewWizardView> {
           {gameManager.addOpponentActiveEffect(payload['effect'])},
       },
     );
+    _duelChannel.onBroadcast(
+        event: 'death', callback: (payload) => wizardDied(false));
     super.initState();
   }
 
@@ -176,6 +179,34 @@ class _NewWizardViewState extends State<NewWizardView> {
     }
   }
 
+  void wizardDied(bool self) {
+    String winner;
+    if (self) {
+      winner = Player().opponentName;
+      setState(() {
+        playerDead = true;
+      });
+    } else {
+      winner = Player().name;
+      setState(() {
+        opponentDead = true;
+      });
+    }
+    Provider.of<GameManager>(context, listen: false).changeWinner(winner);
+    Timer(const Duration(seconds: Constants.endDurationSec), () {
+      endGame();
+    });
+  }
+
+  void endGame() async {
+    Provider.of<GameManager>(context, listen: false).resetAll();
+    if (Player().isManager) {
+      await supabase
+          .from('duels')
+          .update({'gamestate': 'ending'}).eq('id', Player().duelId);
+    }
+  }
+
   /// Notifying the other player
   void notifyPotionAction(int potionId, bool isThrown) {
     _duelChannel.sendBroadcastMessage(
@@ -193,19 +224,29 @@ class _NewWizardViewState extends State<NewWizardView> {
         event: 'health_update', payload: {'health': health});
   }
 
-  void notifyDeath() {}
+  void notifyDeath() {
+    _duelChannel.sendBroadcastMessage(event: 'death', payload: {});
+  }
 
   /// Effects
   void takeDamage(int amount) {
     amount = amount * damageMultiplier;
     Provider.of<GameManager>(context, listen: false)
         .changePlayerHealth(-amount);
+    if (Provider.of<GameManager>(context, listen: false).playerHealth <= 0) {
+      Provider.of<GameManager>(context, listen: false).setPlayerHealth(0);
+      wizardDied(true);
+      notifyDeath();
+    }
     notifyHealth(Provider.of<GameManager>(context, listen: false).playerHealth);
   }
 
   void heal(int amount) {
     amount = amount * healMultiplier;
     Provider.of<GameManager>(context, listen: false).changePlayerHealth(amount);
+    if (Provider.of<GameManager>(context, listen: false).playerHealth > 100) {
+      Provider.of<GameManager>(context, listen: false).setPlayerHealth(100);
+    }
     notifyHealth(Provider.of<GameManager>(context, listen: false).playerHealth);
   }
 
@@ -216,12 +257,12 @@ class _NewWizardViewState extends State<NewWizardView> {
     final timer = Timer.periodic(
       Duration(seconds: tickSpeed),
       (timer) {
+        onTimeout();
+        tickCount += 1;
         if (tickCount == tickAmount) {
           removeActiveEffect(effect);
           return;
         }
-        onTimeout();
-        tickCount += 1;
       },
     );
     activeEffectTimers.add([effect, timer]);

@@ -21,7 +21,7 @@ class _NewWizardViewState extends State<NewWizardView> {
   bool opponentDead = false;
   int damageMultiplier = 1;
   int healMultiplier = 1;
-  List ongoingEffects = [];
+  List activeEffectTimers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class _NewWizardViewState extends State<NewWizardView> {
                 gameManager.emptyPotion();
               },
               child: SizedBox(
-                height: 100,
+                height: 200,
                 width: 100,
                 child: Container(
                   decoration: BoxDecoration(
@@ -52,7 +52,8 @@ class _NewWizardViewState extends State<NewWizardView> {
                                 Text('Health: ${gameManager.playerHealth}'),
                                 (!(gameManager.playerActionText == ''))
                                     ? Text(gameManager.playerActionText)
-                                    : Container()
+                                    : Container(),
+                                Text(gameManager.playerActiveEffects.toString())
                               ],
                             )
                           : const Text('Dead')),
@@ -68,7 +69,7 @@ class _NewWizardViewState extends State<NewWizardView> {
                 gameManager.emptyPotion();
               },
               child: SizedBox(
-                height: 100,
+                height: 200,
                 width: 100,
                 child: Container(
                   decoration: BoxDecoration(
@@ -81,7 +82,9 @@ class _NewWizardViewState extends State<NewWizardView> {
                                 Text('Health: ${gameManager.opponentHealth}'),
                                 (!(gameManager.opponentActionText == ''))
                                     ? Text(gameManager.opponentActionText)
-                                    : Container()
+                                    : Container(),
+                                Text(gameManager.opponentActiveEffects
+                                    .toString())
                               ],
                             )
                           : const Text('Dead')),
@@ -107,21 +110,31 @@ class _NewWizardViewState extends State<NewWizardView> {
         callback: (payload) =>
             gameManager.setOpponentHealth(payload['health']));
     _duelChannel.onBroadcast(
-        event: 'potion_update',
-        callback: (payload) => {
-              if (payload['isThrown'])
-                {
-                  Provider.of<GameManager>(context, listen: false)
-                      .setOpponentActionText(
-                          'threw ${Constants.idToPotions[payload['potionId']]!}')
-                }
-              else
-                {
-                  Provider.of<GameManager>(context, listen: false)
-                      .setOpponentActionText(
-                          'drank ${Constants.idToPotions[payload['potionId']]!}')
-                }
-            });
+      event: 'potion_update',
+      callback: (payload) => {
+        if (payload['isThrown'])
+          {
+            Provider.of<GameManager>(context, listen: false)
+                .setOpponentActionText(
+                    'threw ${Constants.idToPotions[payload['potionId']]!}')
+          }
+        else
+          {
+            Provider.of<GameManager>(context, listen: false)
+                .setOpponentActionText(
+                    'drank ${Constants.idToPotions[payload['potionId']]!}')
+          }
+      },
+    );
+    _duelChannel.onBroadcast(
+      event: 'effect_update',
+      callback: (payload) => {
+        if (payload['remove'])
+          {gameManager.removeOpponentActiveEffect(payload['effect'])}
+        else
+          {gameManager.addOpponentActiveEffect(payload['effect'])},
+      },
+    );
     super.initState();
   }
 
@@ -170,7 +183,10 @@ class _NewWizardViewState extends State<NewWizardView> {
         payload: {'potionId': potionId, 'isThrown': isThrown});
   }
 
-  void notifyEffect(effect) {}
+  void notifyEffect(String effect, bool remove) {
+    _duelChannel.sendBroadcastMessage(
+        event: 'effect_update', payload: {'effect': effect, 'remove': remove});
+  }
 
   void notifyHealth(int health) {
     _duelChannel.sendBroadcastMessage(
@@ -195,27 +211,33 @@ class _NewWizardViewState extends State<NewWizardView> {
 
   void createPeriodicEffect(
       String effect, int tickSpeed, int tickAmount, Function onTimeout) {
-    removeOngoingEffect(effect);
+    removeActiveEffect(effect);
     int tickCount = 0;
     final timer = Timer.periodic(
       Duration(seconds: tickSpeed),
       (timer) {
         if (tickCount == tickAmount) {
-          removeOngoingEffect(effect);
+          removeActiveEffect(effect);
           return;
         }
         onTimeout();
         tickCount += 1;
       },
     );
-    ongoingEffects.add([effect, timer]);
+    activeEffectTimers.add([effect, timer]);
+    Provider.of<GameManager>(context, listen: false)
+        .addPlayerActiveEffect(effect);
+    notifyEffect(effect, false);
   }
 
-  void removeOngoingEffect(String effect) {
-    for (var i = 0; i < ongoingEffects.length; i++) {
-      if (ongoingEffects[i][0] == effect) {
-        ongoingEffects[i][1].cancel();
-        ongoingEffects.removeAt(i);
+  void removeActiveEffect(String effect) {
+    for (var i = 0; i < activeEffectTimers.length; i++) {
+      if (activeEffectTimers[i][0] == effect) {
+        activeEffectTimers[i][1].cancel();
+        activeEffectTimers.removeAt(i);
+        Provider.of<GameManager>(context, listen: false)
+            .removePlayerActiveEffect(effect);
+        notifyEffect(effect, true);
       }
     }
   }

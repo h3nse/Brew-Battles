@@ -8,7 +8,8 @@ class GameManager extends ChangeNotifier {
   int _finishedPotionId = 0;
   int _playerHealth = 0;
   int _opponentHealth = 0;
-  List<int> _activeEffects = [];
+  final List<String> _playerActiveEffects = [];
+  final List<String> _opponentActiveEffects = [];
   String _winner = '';
 
   // Temp until we have animations
@@ -22,7 +23,8 @@ class GameManager extends ChangeNotifier {
   int get finishedPotion => _finishedPotionId;
   int get playerHealth => _playerHealth;
   int get opponentHealth => _opponentHealth;
-  List<int> get activeEffects => _activeEffects;
+  List<String> get playerActiveEffects => _playerActiveEffects;
+  List<String> get opponentActiveEffects => _opponentActiveEffects;
   String get winner => _winner;
 
   String get playerActionText => _playerActionText;
@@ -85,13 +87,23 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addEffect(int effect) {
-    _activeEffects.add(effect);
+  void addPlayerActiveEffect(String effect) {
+    _playerActiveEffects.add(effect);
     notifyListeners();
   }
 
-  void removeEffect(int effect) {
-    _activeEffects.removeWhere((element) => element == effect);
+  void addOpponentActiveEffect(String effect) {
+    _opponentActiveEffects.add(effect);
+    notifyListeners();
+  }
+
+  void removePlayerActiveEffect(String effect) {
+    _playerActiveEffects.removeWhere((element) => element == effect);
+    notifyListeners();
+  }
+
+  void removeOpponentActiveEffect(String effect) {
+    _opponentActiveEffects.removeWhere((element) => element == effect);
     notifyListeners();
   }
 

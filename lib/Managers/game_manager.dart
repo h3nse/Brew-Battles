@@ -8,6 +8,7 @@ class GameManager extends ChangeNotifier {
   int _finishedPotionId = 0;
   int _playerHealth = 0;
   int _opponentHealth = 0;
+  List<int> _activeEffects = [];
   String _winner = '';
 
   String get gamestate => _gamestate;
@@ -17,6 +18,7 @@ class GameManager extends ChangeNotifier {
   int get finishedPotion => _finishedPotionId;
   int get playerHealth => _playerHealth;
   int get opponentHealth => _opponentHealth;
+  List<int> get activeEffects => _activeEffects;
   String get winner => _winner;
 
   void changeGamestate(String value) {
@@ -61,13 +63,28 @@ class GameManager extends ChangeNotifier {
     changeFinishedPotionId(0);
   }
 
-  void changePlayerHealth(int health) {
+  void changePlayerHealth(int amount) {
+    _playerHealth += amount;
+    notifyListeners();
+  }
+
+  void setPlayerHealth(int health) {
     _playerHealth = health;
     notifyListeners();
   }
 
-  void changeOpponentHealth(int health) {
+  void setOpponentHealth(int health) {
     _opponentHealth = health;
+    notifyListeners();
+  }
+
+  void addEffect(int effect) {
+    _activeEffects.add(effect);
+    notifyListeners();
+  }
+
+  void removeEffect(int effect) {
+    _activeEffects.removeWhere((element) => element == effect);
     notifyListeners();
   }
 

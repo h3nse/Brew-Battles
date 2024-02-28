@@ -18,7 +18,6 @@ class ChallengePage extends StatefulWidget {
 class _ChallengePageState extends State<ChallengePage> {
   bool isChallenging = false;
   late RealtimeChannel _duelChannel;
-  late RealtimeChannel _playerChannel;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +50,7 @@ class _ChallengePageState extends State<ChallengePage> {
   }
 
   void subscribeToPlayers() {
-    _playerChannel = supabase
+    supabase
         .channel('player')
         .onPostgresChanges(
             event: PostgresChangeEvent.update,

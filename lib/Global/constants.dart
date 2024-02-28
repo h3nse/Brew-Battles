@@ -121,25 +121,23 @@ class Constants {
   static const int initialHealth = 100;
 
   static const Map<int, String> idToIngredients = {
-    1: 'Phoenix Feather Fern',
-    2: 'Ember Crystal',
-    3: 'Shadowroot',
-    4: 'Moonstone Nectar',
-    5: 'Dragon\'s Tounge'
+    1: 'Petrified Rose Petal',
+    2: 'Boom Berries',
+    3: 'Lingering Algae',
+    4: 'Beetle Shell',
+    5: 'Fire Bloom'
   };
 
   static const Map<int, String> idToPotions = {
     0: 'Default Potion',
-    1: 'Elixir of Eternal Flames',
-    2: 'Potion of The Shadowbound',
-    3: 'Celestial Frost Potion',
-    4: 'Potion of Venom',
-    5: 'Dragonhearts Brew',
+    1: 'Potion of healing',
+    2: 'Exploding Potion',
+    3: 'Potion of fire',
   };
 
-  static const int msPotionShakeInterval = 500;
-  static const int potionShakeThreshold = 5;
-  static const int maxMixLevel = 2;
+  static const int msPotionShakeInterval = 1500;
+  static const int potionShakeThreshold = 10;
+  static const int maxMixLevel = 10;
 
   static const List<List> potions = [
     [
@@ -148,33 +146,19 @@ class Constants {
     ],
     [
       2,
-      [3, 4]
+      [2]
     ],
     [
       3,
-      [2, 4]
-    ],
-    [
-      4,
-      [3, 4, 5]
-    ],
-    [
-      5,
-      [1, 5]
+      [3, 5]
     ],
   ];
 
-  static const Map<int, List> potionEffects = {
-    0: [],
-    1: [
-      ['Damage', 50]
-    ],
-    2: [],
-    3: [],
-    4: [],
-    5: [
-      ['Heal', 10]
-    ],
+  static const Map<int, Map<String, int>> potionEffectValues = {
+    0: {},
+    1: {'Heal': 10},
+    2: {'Damage': 10},
+    3: {'TickSpeed': 1, 'TickAmount': 10, 'TickDamage': 2}
   };
 
   static const int endDurationSec = 5;

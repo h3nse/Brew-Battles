@@ -26,8 +26,8 @@ class _WizardViewState extends State<WizardView> {
   void initState() {
     final gameManager = Provider.of<GameManager>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      gameManager.changePlayerHealth(Constants.initialHealth);
-      gameManager.changeOpponentHealth(Constants.initialHealth);
+      gameManager.setPlayerHealth(Constants.initialHealth);
+      gameManager.setOpponentHealth(Constants.initialHealth);
     });
 
     _duelChannel = supabase.channel('update');
@@ -35,7 +35,7 @@ class _WizardViewState extends State<WizardView> {
         .onBroadcast(
             event: 'health_update',
             callback: (payload) =>
-                updateHealth(gameManager, false, payload['amount']))
+                updateHealth(gameManager, false, payload['health']))
         .subscribe();
     _duelChannel.onBroadcast(
         event: 'potion',
@@ -45,9 +45,9 @@ class _WizardViewState extends State<WizardView> {
     super.initState();
   }
 
-  void notifyHealthChange(int amount) {
+  void notifyHealthChange(int health) {
     _duelChannel.sendBroadcastMessage(
-        event: 'health_update', payload: {'amount': amount});
+        event: 'health_update', payload: {'health': health});
   }
 
   void notifyPotionThrow(int potionId) {
@@ -71,23 +71,24 @@ class _WizardViewState extends State<WizardView> {
         wizardDied(true);
       }
     } else {
-      gameManager.changeOpponentHealth(health);
+      gameManager.setOpponentHealth(health);
     }
   }
 
   void handlePotion(GameManager gameManager, int potion) {
-    final effects = Constants.potionEffects[potion];
-    for (var effect in effects!) {
-      switch (effect[0]) {
-        case 'Damage':
-          updateHealth(gameManager, true,
-              (gameManager.playerHealth - effect[1]).toInt());
-          break;
-        case 'Heal':
-          updateHealth(gameManager, true, effect[1]);
-          break;
-      }
-    }
+    // final effects = Constants.potionEffects[potion];
+    // for (var effect in effects!) {
+    //   switch (effect[0]) {
+    //     case 'Damage':
+    //       updateHealth(gameManager, true,
+    //           (gameManager.playerHealth - effect[1]).toInt());
+    //       break;
+    //     case 'Heal':
+    //       updateHealth(gameManager, true,
+    //           (gameManager.playerHealth + effect[1]).toInt());
+    //       break;
+    //   }
+    // }
   }
 
   void throwPotion(int potionId) {
@@ -99,12 +100,12 @@ class _WizardViewState extends State<WizardView> {
     String winner;
     if (self) {
       notifyDeath();
-      winner = Player().name;
+      winner = Player().opponentName;
       setState(() {
         playerDead = true;
       });
     } else {
-      winner = Player().opponentName;
+      winner = Player().name;
       setState(() {
         opponentDead = true;
       });

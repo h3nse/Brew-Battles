@@ -17,6 +17,7 @@ class _NewWizardViewState extends State<NewWizardView> {
   bool opponentDead = false;
   int damageMultiplier = 1;
   int healMultiplier = 1;
+  List ongoingEffects = [];
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +113,8 @@ class _NewWizardViewState extends State<NewWizardView> {
         takeDamage(Constants.potionEffectValues[potionId]!['Damage']!);
         break;
       case 3:
-        periodicTimer(
+        periodicEffect(
+          'Burning',
           Constants.potionEffectValues[potionId]!['TickSpeed']!,
           Constants.potionEffectValues[potionId]!['TickAmount']!,
           () => takeDamage(
@@ -147,15 +149,31 @@ class _NewWizardViewState extends State<NewWizardView> {
     notifyHealth(Provider.of<GameManager>(context, listen: false).playerHealth);
   }
 
-  void periodicTimer(int tickSpeed, int tickAmount, Function onTimeout) {
-    int tickCount = 0;
-    Timer.periodic(Duration(seconds: tickSpeed), (timer) {
-      if (tickCount == tickAmount) {
-        timer.cancel();
-        return;
+  void periodicEffect(
+      String effect, int tickSpeed, int tickAmount, Function onTimeout) {
+    for (var i = 0; i < ongoingEffects.length; i++) {
+      if (ongoingEffects[i][0] == effect) {
+        ongoingEffects[i][1].cancel();
+        ongoingEffects.removeAt(i);
       }
-      onTimeout();
-      tickCount += 1;
-    });
+    }
+    int tickCount = 0;
+    final timer = Timer.periodic(
+      Duration(seconds: tickSpeed),
+      (timer) {
+        if (tickCount == tickAmount) {
+          for (var i = 0; i < ongoingEffects.length; i++) {
+            if (ongoingEffects[i][0] == effect) {
+              ongoingEffects[i][1].cancel();
+              ongoingEffects.removeAt(i);
+            }
+          }
+          return;
+        }
+        onTimeout();
+        tickCount += 1;
+      },
+    );
+    ongoingEffects.add([effect, timer]);
   }
 }

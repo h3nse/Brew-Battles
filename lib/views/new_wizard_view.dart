@@ -4,6 +4,9 @@ import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final supabase = Supabase.instance.client;
 
 class NewWizardView extends StatefulWidget {
   const NewWizardView({super.key});
@@ -13,6 +16,7 @@ class NewWizardView extends StatefulWidget {
 }
 
 class _NewWizardViewState extends State<NewWizardView> {
+  late final RealtimeChannel _duelChannel;
   bool playerDead = false;
   bool opponentDead = false;
   int damageMultiplier = 1;
@@ -91,6 +95,11 @@ class _NewWizardViewState extends State<NewWizardView> {
       gameManager.setPlayerHealth(Constants.initialHealth);
       gameManager.setOpponentHealth(Constants.initialHealth);
     });
+    _duelChannel = supabase.channel('updates').subscribe();
+    _duelChannel.onBroadcast(
+        event: 'health_update',
+        callback: (payload) =>
+            gameManager.setOpponentHealth(payload['health']));
     super.initState();
   }
 
@@ -113,7 +122,7 @@ class _NewWizardViewState extends State<NewWizardView> {
         takeDamage(Constants.potionEffectValues[potionId]!['Damage']!);
         break;
       case 3:
-        periodicEffect(
+        createPeriodicEffect(
           'Burning',
           Constants.potionEffectValues[potionId]!['TickSpeed']!,
           Constants.potionEffectValues[potionId]!['TickAmount']!,
@@ -130,7 +139,8 @@ class _NewWizardViewState extends State<NewWizardView> {
   void notifyEffect(effect) {}
 
   void notifyHealth(int health) {
-    print('Notifying new health: $health');
+    _duelChannel.sendBroadcastMessage(
+        event: 'health_update', payload: {'health': health});
   }
 
   void notifyDeath() {}
@@ -149,25 +159,15 @@ class _NewWizardViewState extends State<NewWizardView> {
     notifyHealth(Provider.of<GameManager>(context, listen: false).playerHealth);
   }
 
-  void periodicEffect(
+  void createPeriodicEffect(
       String effect, int tickSpeed, int tickAmount, Function onTimeout) {
-    for (var i = 0; i < ongoingEffects.length; i++) {
-      if (ongoingEffects[i][0] == effect) {
-        ongoingEffects[i][1].cancel();
-        ongoingEffects.removeAt(i);
-      }
-    }
+    removeOngoingEffect(effect);
     int tickCount = 0;
     final timer = Timer.periodic(
       Duration(seconds: tickSpeed),
       (timer) {
         if (tickCount == tickAmount) {
-          for (var i = 0; i < ongoingEffects.length; i++) {
-            if (ongoingEffects[i][0] == effect) {
-              ongoingEffects[i][1].cancel();
-              ongoingEffects.removeAt(i);
-            }
-          }
+          removeOngoingEffect(effect);
           return;
         }
         onTimeout();
@@ -175,5 +175,14 @@ class _NewWizardViewState extends State<NewWizardView> {
       },
     );
     ongoingEffects.add([effect, timer]);
+  }
+
+  void removeOngoingEffect(String effect) {
+    for (var i = 0; i < ongoingEffects.length; i++) {
+      if (ongoingEffects[i][0] == effect) {
+        ongoingEffects[i][1].cancel();
+        ongoingEffects.removeAt(i);
+      }
+    }
   }
 }

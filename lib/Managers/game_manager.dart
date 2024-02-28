@@ -11,6 +11,10 @@ class GameManager extends ChangeNotifier {
   List<int> _activeEffects = [];
   String _winner = '';
 
+  // Temp until we have animations
+  String _playerActionText = '';
+  String _opponentActionText = '';
+
   String get gamestate => _gamestate;
   String get potionState => _potionState;
   List<int> get ingredients => _ingredients;
@@ -20,6 +24,9 @@ class GameManager extends ChangeNotifier {
   int get opponentHealth => _opponentHealth;
   List<int> get activeEffects => _activeEffects;
   String get winner => _winner;
+
+  String get playerActionText => _playerActionText;
+  String get opponentActionText => _opponentActionText;
 
   void changeGamestate(String value) {
     _gamestate = value;
@@ -90,6 +97,17 @@ class GameManager extends ChangeNotifier {
 
   void changeWinner(String winner) {
     _winner = winner;
+    notifyListeners();
+  }
+
+  // Remove when we have animations
+  void setPlayerActionText(String value) {
+    _playerActionText = value;
+    notifyListeners();
+  }
+
+  void setOpponentActionText(String value) {
+    _opponentActionText = value;
     notifyListeners();
   }
 }

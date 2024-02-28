@@ -48,8 +48,11 @@ class _NewWizardViewState extends State<NewWizardView> {
                       child: (!playerDead)
                           ? Column(
                               children: [
-                                const Text('Left Wizard'),
-                                Text('Health: ${gameManager.playerHealth}')
+                                const Text('You'),
+                                Text('Health: ${gameManager.playerHealth}'),
+                                (!(gameManager.playerActionText == ''))
+                                    ? Text(gameManager.playerActionText)
+                                    : Container()
                               ],
                             )
                           : const Text('Dead')),
@@ -74,8 +77,11 @@ class _NewWizardViewState extends State<NewWizardView> {
                       child: (!opponentDead)
                           ? Column(
                               children: [
-                                const Text('Right Wizard'),
-                                Text('Health: ${gameManager.opponentHealth}')
+                                const Text('Opponent'),
+                                Text('Health: ${gameManager.opponentHealth}'),
+                                (!(gameManager.opponentActionText == ''))
+                                    ? Text(gameManager.opponentActionText)
+                                    : Container()
                               ],
                             )
                           : const Text('Dead')),
@@ -100,16 +106,40 @@ class _NewWizardViewState extends State<NewWizardView> {
         event: 'health_update',
         callback: (payload) =>
             gameManager.setOpponentHealth(payload['health']));
+    _duelChannel.onBroadcast(
+        event: 'potion_update',
+        callback: (payload) => {
+              if (payload['isThrown'])
+                {
+                  Provider.of<GameManager>(context, listen: false)
+                      .setOpponentActionText(
+                          'threw ${Constants.idToPotions[payload['potionId']]!}')
+                }
+              else
+                {
+                  Provider.of<GameManager>(context, listen: false)
+                      .setOpponentActionText(
+                          'drank ${Constants.idToPotions[payload['potionId']]!}')
+                }
+            });
     super.initState();
   }
 
   /// Potion Application
   void drinkPotion(int potionId) {
+    // Replace with animation
+    Provider.of<GameManager>(context, listen: false)
+        .setPlayerActionText('drank ${Constants.idToPotions[potionId]!}');
+
     applyPotion(potionId);
     notifyPotionAction(potionId, false);
   }
 
   void throwPotion(int potionId) {
+    // Replace with animation
+    Provider.of<GameManager>(context, listen: false)
+        .setPlayerActionText('threw ${Constants.idToPotions[potionId]!}');
+
     notifyPotionAction(potionId, true);
   }
 
@@ -134,7 +164,11 @@ class _NewWizardViewState extends State<NewWizardView> {
   }
 
   /// Notifying the other player
-  void notifyPotionAction(int potionId, bool isThrown) {}
+  void notifyPotionAction(int potionId, bool isThrown) {
+    _duelChannel.sendBroadcastMessage(
+        event: 'potion_update',
+        payload: {'potionId': potionId, 'isThrown': isThrown});
+  }
 
   void notifyEffect(effect) {}
 

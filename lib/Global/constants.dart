@@ -157,7 +157,7 @@ class Constants {
   static const Map<int, Map<String, int>> potionEffectValues = {
     0: {},
     1: {'Heal': 10},
-    2: {'Damage': 100},
+    2: {'Damage': 10},
     3: {'TickSpeed': 2, 'TickAmount': 10, 'TickDamage': 2}
   };
 

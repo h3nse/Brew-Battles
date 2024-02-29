@@ -1,40 +1,89 @@
 import 'package:flutter/material.dart';
 
 class GameManager extends ChangeNotifier {
+  /// Game related
   String _gamestate = 'starting';
   String _potionState = 'empty';
+  int _playerHealth = 0;
+  int _opponentHealth = 0;
+  String _winner = '';
+  String _playerActionText = ''; // Temp until we have animations
+  String _opponentActionText = ''; // Temp until we have animations
+  /// Potion related
   List<int> _ingredients = [];
   int _mixLevel = 0;
   int _finishedPotionId = 0;
-  int _playerHealth = 0;
-  int _opponentHealth = 0;
+
+  /// Effect related
   final List<String> _playerActiveEffects = [];
   final List<String> _opponentActiveEffects = [];
-  String _winner = '';
+  bool _isBlinded = false;
 
-  // Temp until we have animations
-  String _playerActionText = '';
-  String _opponentActionText = '';
-
+  /// Game related
   String get gamestate => _gamestate;
   String get potionState => _potionState;
+  int get playerHealth => _playerHealth;
+  int get opponentHealth => _opponentHealth;
+  String get winner => _winner;
+  String get playerActionText =>
+      _playerActionText; // Temp until we have animations
+  String get opponentActionText =>
+      _opponentActionText; // Temp until we have animations
+  /// Potion related
   List<int> get ingredients => _ingredients;
   int get mixLevel => _mixLevel;
   int get finishedPotion => _finishedPotionId;
-  int get playerHealth => _playerHealth;
-  int get opponentHealth => _opponentHealth;
+
+  /// Effect related
   List<String> get playerActiveEffects => _playerActiveEffects;
   List<String> get opponentActiveEffects => _opponentActiveEffects;
-  String get winner => _winner;
+  bool get isBlinded => _isBlinded;
 
-  String get playerActionText => _playerActionText;
-  String get opponentActionText => _opponentActionText;
-
+  /// Game related
   void changeGamestate(String value) {
     _gamestate = value;
     notifyListeners();
   }
 
+  void changePlayerHealth(int amount) {
+    _playerHealth += amount;
+    notifyListeners();
+  }
+
+  void setPlayerHealth(int health) {
+    _playerHealth = health;
+    notifyListeners();
+  }
+
+  void setOpponentHealth(int health) {
+    _opponentHealth = health;
+    notifyListeners();
+  }
+
+  void changeWinner(String winner) {
+    _winner = winner;
+    notifyListeners();
+  }
+
+  void setPlayerActionText(String value) {
+    _playerActionText = value;
+    notifyListeners();
+  } // Remove when we have animations
+
+  void setOpponentActionText(String value) {
+    _opponentActionText = value;
+    notifyListeners();
+  } // Remove when we have animations
+
+  void resetAll() {
+    emptyPotion();
+    _playerActiveEffects.clear();
+    _opponentActiveEffects.clear();
+    setPlayerActionText(''); // Remove later
+    setOpponentActionText(''); // Remove later
+  }
+
+  /// Potion related
   void changePotionState(String value) {
     _potionState = value;
     notifyListeners();
@@ -72,21 +121,7 @@ class GameManager extends ChangeNotifier {
     changeFinishedPotionId(0);
   }
 
-  void changePlayerHealth(int amount) {
-    _playerHealth += amount;
-    notifyListeners();
-  }
-
-  void setPlayerHealth(int health) {
-    _playerHealth = health;
-    notifyListeners();
-  }
-
-  void setOpponentHealth(int health) {
-    _opponentHealth = health;
-    notifyListeners();
-  }
-
+  /// Effect related
   void addPlayerActiveEffect(String effect) {
     _playerActiveEffects.add(effect);
     notifyListeners();
@@ -107,28 +142,8 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeWinner(String winner) {
-    _winner = winner;
+  void setIsBlinded(bool value) {
+    _isBlinded = value;
     notifyListeners();
-  }
-
-  // Remove when we have animations
-  void setPlayerActionText(String value) {
-    _playerActionText = value;
-    notifyListeners();
-  }
-
-  void setOpponentActionText(String value) {
-    _opponentActionText = value;
-    notifyListeners();
-  }
-
-  void resetAll() {
-    emptyPotion();
-    _playerActiveEffects.clear();
-    _opponentActiveEffects.clear();
-    // Remove later
-    setPlayerActionText('');
-    setOpponentActionText('');
   }
 }

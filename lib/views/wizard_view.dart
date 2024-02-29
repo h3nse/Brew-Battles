@@ -177,6 +177,14 @@ class _WizardViewState extends State<WizardView> {
               Constants.potionEffectValues[potionId]!['TickDamage']!),
         );
         break;
+      case 4:
+        Provider.of<GameManager>(context, listen: false).setIsBlinded(true);
+        createTimedEffect(
+            'Blinded', Constants.potionEffectValues[potionId]!['Duration']!,
+            () {
+          Provider.of<GameManager>(context, listen: false).setIsBlinded(false);
+        });
+        break;
     }
   }
 
@@ -262,10 +270,21 @@ class _WizardViewState extends State<WizardView> {
         tickCount += 1;
         if (tickCount == tickAmount) {
           removeActiveEffect(effect);
-          return;
         }
       },
     );
+    activeEffectTimers.add([effect, timer]);
+    Provider.of<GameManager>(context, listen: false)
+        .addPlayerActiveEffect(effect);
+    notifyEffect(effect, false);
+  }
+
+  void createTimedEffect(String effect, int duration, Function onTimeout) {
+    removeActiveEffect(effect);
+    final timer = Timer(Duration(seconds: duration), () {
+      onTimeout();
+      removeActiveEffect(effect);
+    });
     activeEffectTimers.add([effect, timer]);
     Provider.of<GameManager>(context, listen: false)
         .addPlayerActiveEffect(effect);

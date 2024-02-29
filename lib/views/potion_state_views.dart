@@ -35,7 +35,9 @@ class _EmptyPotionState extends State<EmptyPotion> {
               for (var i in ingredientIds) {
                 namedIngredients.add(Constants.idToIngredients[i]!);
               }
-              return Text('Ingredients: $namedIngredients');
+              return (!gameManager.isBlinded)
+                  ? Text('Ingredients: $namedIngredients')
+                  : const Text('A Hazy Fog Obscures Your potion');
             })
           ],
         )),

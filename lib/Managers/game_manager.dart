@@ -11,13 +11,14 @@ class GameManager extends ChangeNotifier {
   String _opponentActionText = ''; // Temp until we have animations
   /// Potion related
   List<int> _ingredients = [];
-  int _mixLevel = 0;
+  double _mixLevel = 0;
   int _finishedPotionId = 0;
 
   /// Effect related
   final List<String> _playerActiveEffects = [];
   final List<String> _opponentActiveEffects = [];
   bool _isBlinded = false;
+  double _potionShakeMultiplier = 1;
 
   /// Game related
   String get gamestate => _gamestate;
@@ -31,13 +32,14 @@ class GameManager extends ChangeNotifier {
       _opponentActionText; // Temp until we have animations
   /// Potion related
   List<int> get ingredients => _ingredients;
-  int get mixLevel => _mixLevel;
+  double get mixLevel => _mixLevel;
   int get finishedPotion => _finishedPotionId;
 
   /// Effect related
   List<String> get playerActiveEffects => _playerActiveEffects;
   List<String> get opponentActiveEffects => _opponentActiveEffects;
   bool get isBlinded => _isBlinded;
+  double get potionShakeMultiplier => _potionShakeMultiplier;
 
   /// Game related
   void changeGamestate(String value) {
@@ -99,7 +101,7 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void increaseMixLevel(int value) {
+  void increaseMixLevel(double value) {
     _mixLevel += value;
     notifyListeners();
   }
@@ -144,6 +146,11 @@ class GameManager extends ChangeNotifier {
 
   void setIsBlinded(bool value) {
     _isBlinded = value;
+    notifyListeners();
+  }
+
+  void setPotionShakeMultiplier(double multiplier) {
+    _potionShakeMultiplier = multiplier;
     notifyListeners();
   }
 }

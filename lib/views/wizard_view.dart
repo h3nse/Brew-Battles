@@ -185,6 +185,25 @@ class _WizardViewState extends State<WizardView> {
           Provider.of<GameManager>(context, listen: false).setIsBlinded(false);
         });
         break;
+      case 5:
+        Provider.of<GameManager>(context, listen: false)
+            .setPotionShakeMultiplier(
+                Constants.potionEffectValues[potionId]!['Multiplier']);
+        createTimedEffect(
+            'Hasted', Constants.potionEffectValues[potionId]!['Duration'], () {
+          Provider.of<GameManager>(context, listen: false)
+              .setPotionShakeMultiplier(1);
+        });
+        break;
+      case 6:
+        Provider.of<GameManager>(context, listen: false)
+            .setPotionShakeMultiplier(
+                Constants.potionEffectValues[potionId]!['Multiplier']);
+        createTimedEffect(
+            'Slowed', Constants.potionEffectValues[potionId]!['Duration'], () {
+          Provider.of<GameManager>(context, listen: false)
+              .setPotionShakeMultiplier(1);
+        });
     }
   }
 

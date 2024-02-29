@@ -87,7 +87,9 @@ class _MixingPotionState extends State<MixingPotion> {
           event.y.abs() > Constants.potionShakeThreshold ||
           event.z.abs() > Constants.potionShakeThreshold) {
         final gameManager = Provider.of<GameManager>(context, listen: false);
-        gameManager.increaseMixLevel(1);
+        gameManager.increaseMixLevel(
+            Provider.of<GameManager>(context, listen: false)
+                .potionShakeMultiplier);
         if (gameManager.mixLevel >= Constants.maxMixLevel) {
           createPotion();
           gameManager.changePotionState('finished');

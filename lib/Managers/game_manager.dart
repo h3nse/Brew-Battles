@@ -4,8 +4,8 @@ class GameManager extends ChangeNotifier {
   /// Game related
   String _gamestate = 'starting';
   String _potionState = 'empty';
-  int _playerHealth = 0;
-  int _opponentHealth = 0;
+  double _playerHealth = 0;
+  double _opponentHealth = 0;
   String _winner = '';
   String _playerActionText = ''; // Temp until we have animations
   String _opponentActionText = ''; // Temp until we have animations
@@ -21,12 +21,14 @@ class GameManager extends ChangeNotifier {
   double _potionShakeMultiplier = 1;
   bool _isFrozen = false;
   bool _hasShield = false;
+  double _damageMultiplier = 1;
+  double _healMultiplier = 1;
 
   /// Game related
   String get gamestate => _gamestate;
   String get potionState => _potionState;
-  int get playerHealth => _playerHealth;
-  int get opponentHealth => _opponentHealth;
+  double get playerHealth => _playerHealth;
+  double get opponentHealth => _opponentHealth;
   String get winner => _winner;
   String get playerActionText =>
       _playerActionText; // Temp until we have animations
@@ -44,6 +46,8 @@ class GameManager extends ChangeNotifier {
   double get potionShakeMultiplier => _potionShakeMultiplier;
   bool get isFrozen => _isFrozen;
   bool get hasShield => _hasShield;
+  double get damageMultiplier => _damageMultiplier;
+  double get healMultiplier => _healMultiplier;
 
   /// Game related
   void changeGamestate(String value) {
@@ -51,17 +55,17 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changePlayerHealth(int amount) {
+  void changePlayerHealth(double amount) {
     _playerHealth += amount;
     notifyListeners();
   }
 
-  void setPlayerHealth(int health) {
+  void setPlayerHealth(double health) {
     _playerHealth = health;
     notifyListeners();
   }
 
-  void setOpponentHealth(int health) {
+  void setOpponentHealth(double health) {
     _opponentHealth = health;
     notifyListeners();
   }
@@ -165,6 +169,16 @@ class GameManager extends ChangeNotifier {
 
   void setHasShield(bool value) {
     _hasShield = value;
+    notifyListeners();
+  }
+
+  void setDamageMultiplier(double multiplier) {
+    _damageMultiplier = multiplier;
+    notifyListeners();
+  }
+
+  void setHealMultiplier(double multiplier) {
+    _healMultiplier = multiplier;
     notifyListeners();
   }
 }

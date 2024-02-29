@@ -118,7 +118,7 @@ class Constants {
     ]
   };
 
-  static const int initialHealth = 100;
+  static const double initialHealth = 100;
 
   static const Map<int, String> idToIngredients = {
     1: 'Petrified Rose Petal',
@@ -144,8 +144,8 @@ class Constants {
     7: 'Freezing potion',
     8: 'Shied potion',
     9: 'Potion of vulnerability',
-    10: 'Potion of clumsiness',
-    11: 'Potion of toughness',
+    10: 'Potion of toughness',
+    11: 'Potion of clumsiness',
     12: 'Potion of blessing'
   };
 
@@ -192,11 +192,11 @@ class Constants {
     ],
     [
       10,
-      [7, 8]
+      [3, 4]
     ],
     [
       11,
-      [3, 4]
+      [7, 8]
     ],
     [
       12,
@@ -206,13 +206,15 @@ class Constants {
 
   static const Map<int, Map<String, dynamic>> potionEffectValues = {
     0: {},
-    1: {'Heal': 10},
-    2: {'Damage': 10},
-    3: {'TickSpeed': 2, 'TickAmount': 10, 'TickDamage': 2},
+    1: {'Heal': 10.0},
+    2: {'Damage': 10.0},
+    3: {'TickSpeed': 2, 'TickAmount': 10, 'TickDamage': 2.0},
     4: {'Duration': 20},
     5: {'Multiplier': 2.0, 'Duration': 20},
     6: {'Multiplier': 0.5, 'Duration': 20},
-    7: {'Duration': 15}
+    7: {'Duration': 15},
+    9: {'Multiplier': 2.0, 'Duration': 20},
+    10: {'Multiplier': 0.5, 'Duration': 20},
   };
 
   static const int endDurationSec = 5;

@@ -20,8 +20,6 @@ class _WizardViewState extends State<WizardView> {
   late final RealtimeChannel _duelChannel;
   bool playerDead = false;
   bool opponentDead = false;
-  int damageMultiplier = 1;
-  int healMultiplier = 1;
   List activeEffectTimers = [];
 
   @override
@@ -229,6 +227,26 @@ class _WizardViewState extends State<WizardView> {
         gameManager.setHasShield(true);
         gameManager.addPlayerActiveEffect('Shielded');
         notifyEffect('Shielded', false);
+      case 9:
+        // Potion of vulnerability
+        gameManager.setDamageMultiplier(
+            Constants.potionEffectValues[potionId]!['Multiplier']);
+        createTimedEffect(
+            'Vulnerable', Constants.potionEffectValues[potionId]!['Duration'],
+            () {
+          gameManager.setDamageMultiplier(1);
+        });
+        break;
+      case 10:
+        // Potion of toughness
+        gameManager.setDamageMultiplier(
+            Constants.potionEffectValues[potionId]!['Multiplier']);
+        createTimedEffect(
+            'Vulnerable', Constants.potionEffectValues[potionId]!['Duration'],
+            () {
+          gameManager.setDamageMultiplier(1);
+        });
+        break;
     }
   }
 
@@ -272,7 +290,7 @@ class _WizardViewState extends State<WizardView> {
         event: 'effect_update', payload: {'effect': effect, 'remove': remove});
   }
 
-  void notifyHealth(int health) {
+  void notifyHealth(double health) {
     _duelChannel.sendBroadcastMessage(
         event: 'health_update', payload: {'health': health});
   }
@@ -282,8 +300,9 @@ class _WizardViewState extends State<WizardView> {
   }
 
   /// Effects
-  void takeDamage(int amount) {
-    amount = amount * damageMultiplier;
+  void takeDamage(double amount) {
+    amount = amount *
+        Provider.of<GameManager>(context, listen: false).damageMultiplier;
     Provider.of<GameManager>(context, listen: false)
         .changePlayerHealth(-amount);
     if (Provider.of<GameManager>(context, listen: false).playerHealth <= 0) {
@@ -294,8 +313,9 @@ class _WizardViewState extends State<WizardView> {
     notifyHealth(Provider.of<GameManager>(context, listen: false).playerHealth);
   }
 
-  void heal(int amount) {
-    amount = amount * healMultiplier;
+  void heal(double amount) {
+    amount = amount *
+        Provider.of<GameManager>(context, listen: false).healMultiplier;
     Provider.of<GameManager>(context, listen: false).changePlayerHealth(amount);
     if (Provider.of<GameManager>(context, listen: false).playerHealth > 100) {
       Provider.of<GameManager>(context, listen: false).setPlayerHealth(100);

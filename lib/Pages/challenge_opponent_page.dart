@@ -106,8 +106,11 @@ class _ChallengePageState extends State<ChallengePage> {
         .insert({'id': Player().duelId, 'gamestate': 'pending'});
 
     // Set duel_id for both players
-    await supabase.from('players').update({'duel_id': Player().duelId}).or(
-        'id.eq.${Player().id},id.eq.${Player().opponentId}');
+    await supabase
+        .from('players')
+        .update({'duel_id': Player().duelId})
+        .eq('id', Player().id)
+        .eq('id', Player().opponentId);
 
     // Subscribe to duels to see if they accept
     subscribeToDuels();

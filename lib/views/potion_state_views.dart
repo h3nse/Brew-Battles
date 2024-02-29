@@ -16,32 +16,37 @@ class EmptyPotion extends StatefulWidget {
 class _EmptyPotionState extends State<EmptyPotion> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Provider.of<GameManager>(context, listen: false)
-            .changePotionState('mixing');
+    return Consumer<GameManager>(
+      builder: (context, gameManager, child) {
+        List<String> namedIngredients = [];
+        final ingredientIds = gameManager.ingredients;
+        for (var i in ingredientIds) {
+          namedIngredients.add(Constants.idToIngredients[i]!);
+        }
+        return GestureDetector(
+          onTap: () {
+            if (gameManager.isFrozen) {
+              return;
+            }
+            Provider.of<GameManager>(context, listen: false)
+                .changePotionState('mixing');
+          },
+          child: Container(
+            decoration: BoxDecoration(
+                border: Border.all(width: 2, color: Colors.purple)),
+            child: Center(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Empty Potion'),
+                (!gameManager.isBlinded)
+                    ? Text('Ingredients: $namedIngredients')
+                    : const Text('A Hazy Fog Obscures Your potion')
+              ],
+            )),
+          ),
+        );
       },
-      child: Container(
-        decoration:
-            BoxDecoration(border: Border.all(width: 2, color: Colors.purple)),
-        child: Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Empty Potion'),
-            Consumer<GameManager>(builder: (context, gameManager, child) {
-              List<String> namedIngredients = [];
-              final ingredientIds = gameManager.ingredients;
-              for (var i in ingredientIds) {
-                namedIngredients.add(Constants.idToIngredients[i]!);
-              }
-              return (!gameManager.isBlinded)
-                  ? Text('Ingredients: $namedIngredients')
-                  : const Text('A Hazy Fog Obscures Your potion');
-            })
-          ],
-        )),
-      ),
     );
   }
 }
@@ -103,7 +108,9 @@ class _MixingPotionState extends State<MixingPotion> {
   Widget build(BuildContext context) {
     return Center(
       child: Consumer<GameManager>(builder: (context, gameManager, child) {
-        return Text('${gameManager.mixLevel}');
+        return (!gameManager.isBlinded)
+            ? Text('${gameManager.mixLevel}')
+            : const Text('A Hazy Fog Obscures Your potion');
       }),
     );
   }
@@ -117,7 +124,9 @@ class FinishedPotion extends StatelessWidget {
     return Center(
       child: Consumer<GameManager>(
         builder: (context, gameManager, child) {
-          return Text(Constants.idToPotions[gameManager.finishedPotion]!);
+          return (!gameManager.isBlinded)
+              ? Text(Constants.idToPotions[gameManager.finishedPotion]!)
+              : const Text('A Hazy Fog Obscures Your potion');
         },
       ),
     );

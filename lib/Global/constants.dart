@@ -211,7 +211,8 @@ class Constants {
     3: {'TickSpeed': 2, 'TickAmount': 10, 'TickDamage': 2},
     4: {'Duration': 20},
     5: {'Multiplier': 2.0, 'Duration': 20},
-    6: {'Multiplier': 0.5, 'Duration': 20}
+    6: {'Multiplier': 0.5, 'Duration': 20},
+    7: {'Duration': 15}
   };
 
   static const int endDurationSec = 5;

@@ -33,7 +33,8 @@ class _WizardViewState extends State<WizardView> {
           children: [
             GestureDetector(
               onTap: () {
-                if (gameManager.potionState != 'finished') {
+                if (gameManager.potionState != 'finished' ||
+                    gameManager.isFrozen) {
                   return;
                 }
                 drinkPotion(gameManager.finishedPotion);
@@ -63,7 +64,8 @@ class _WizardViewState extends State<WizardView> {
             ),
             GestureDetector(
               onTap: () {
-                if (gameManager.potionState != 'finished') {
+                if (gameManager.potionState != 'finished' ||
+                    gameManager.isFrozen) {
                   return;
                 }
                 throwPotion(gameManager.finishedPotion);
@@ -160,15 +162,19 @@ class _WizardViewState extends State<WizardView> {
     notifyPotionAction(potionId, true);
   }
 
+  /// where each potions effect is programmed
   void applyPotion(int potionId) {
     switch (potionId) {
       case 1:
+        // Healing potion
         heal(Constants.potionEffectValues[potionId]!['Heal']!);
         break;
       case 2:
+        // Explosion potion
         takeDamage(Constants.potionEffectValues[potionId]!['Damage']!);
         break;
       case 3:
+        // Fire potion
         createPeriodicEffect(
           'Burning',
           Constants.potionEffectValues[potionId]!['TickSpeed']!,
@@ -178,6 +184,7 @@ class _WizardViewState extends State<WizardView> {
         );
         break;
       case 4:
+        // Potion of blindness
         Provider.of<GameManager>(context, listen: false).setIsBlinded(true);
         createTimedEffect(
             'Blinded', Constants.potionEffectValues[potionId]!['Duration']!,
@@ -186,6 +193,7 @@ class _WizardViewState extends State<WizardView> {
         });
         break;
       case 5:
+        // Haste potion
         Provider.of<GameManager>(context, listen: false)
             .setPotionShakeMultiplier(
                 Constants.potionEffectValues[potionId]!['Multiplier']);
@@ -196,6 +204,7 @@ class _WizardViewState extends State<WizardView> {
         });
         break;
       case 6:
+        // Slowness potion
         Provider.of<GameManager>(context, listen: false)
             .setPotionShakeMultiplier(
                 Constants.potionEffectValues[potionId]!['Multiplier']);
@@ -204,6 +213,14 @@ class _WizardViewState extends State<WizardView> {
           Provider.of<GameManager>(context, listen: false)
               .setPotionShakeMultiplier(1);
         });
+      case 7:
+        // Freezing potion
+        Provider.of<GameManager>(context, listen: false).setIsFrozen(true);
+        createTimedEffect(
+            'Frozen', Constants.potionEffectValues[potionId]!['Duration']!, () {
+          Provider.of<GameManager>(context, listen: false).setIsFrozen(false);
+        });
+        break;
     }
   }
 

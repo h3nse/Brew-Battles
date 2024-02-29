@@ -31,7 +31,18 @@ class _PotionViewState extends State<PotionView> {
         }
         return Column(
           children: [
-            Expanded(flex: 3, child: potion),
+            Expanded(
+                flex: 3,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    (gameManager.isFrozen)
+                        ? const Positioned(
+                            top: 100, child: Text('You have been frozen'))
+                        : Container(),
+                    potion
+                  ],
+                )),
             Expanded(
               flex: 1,
               child: Row(
@@ -51,6 +62,9 @@ class _PotionViewState extends State<PotionView> {
                               foregroundColor: MaterialStateProperty.all<Color>(
                                   Colors.black)),
                       onPressed: () async {
+                        if (gameManager.isFrozen) {
+                          return;
+                        }
                         String? result =
                             await Navigator.of(context).push<String>(
                           MaterialPageRoute(
@@ -76,6 +90,9 @@ class _PotionViewState extends State<PotionView> {
                             Theme.of(context).colorScheme.onPrimary),
                       ),
                       onPressed: () {
+                        if (gameManager.isFrozen) {
+                          return;
+                        }
                         gameManager.emptyPotion();
                       },
                       child: const Text('Pour Potion Out'))

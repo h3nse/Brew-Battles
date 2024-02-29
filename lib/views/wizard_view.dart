@@ -164,6 +164,13 @@ class _WizardViewState extends State<WizardView> {
 
   /// where each potions effect is programmed
   void applyPotion(int potionId) {
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+    if (gameManager.hasShield) {
+      gameManager.setHasShield(false);
+      gameManager.removePlayerActiveEffect('Shielded');
+      notifyEffect('Shielded', true);
+      return;
+    }
     switch (potionId) {
       case 1:
         // Healing potion
@@ -185,42 +192,43 @@ class _WizardViewState extends State<WizardView> {
         break;
       case 4:
         // Potion of blindness
-        Provider.of<GameManager>(context, listen: false).setIsBlinded(true);
+        gameManager.setIsBlinded(true);
         createTimedEffect(
             'Blinded', Constants.potionEffectValues[potionId]!['Duration']!,
             () {
-          Provider.of<GameManager>(context, listen: false).setIsBlinded(false);
+          gameManager.setIsBlinded(false);
         });
         break;
       case 5:
         // Haste potion
-        Provider.of<GameManager>(context, listen: false)
-            .setPotionShakeMultiplier(
-                Constants.potionEffectValues[potionId]!['Multiplier']);
+        gameManager.setPotionShakeMultiplier(
+            Constants.potionEffectValues[potionId]!['Multiplier']);
         createTimedEffect(
             'Hasted', Constants.potionEffectValues[potionId]!['Duration'], () {
-          Provider.of<GameManager>(context, listen: false)
-              .setPotionShakeMultiplier(1);
+          gameManager.setPotionShakeMultiplier(1);
         });
         break;
       case 6:
         // Slowness potion
-        Provider.of<GameManager>(context, listen: false)
-            .setPotionShakeMultiplier(
-                Constants.potionEffectValues[potionId]!['Multiplier']);
+        gameManager.setPotionShakeMultiplier(
+            Constants.potionEffectValues[potionId]!['Multiplier']);
         createTimedEffect(
             'Slowed', Constants.potionEffectValues[potionId]!['Duration'], () {
-          Provider.of<GameManager>(context, listen: false)
-              .setPotionShakeMultiplier(1);
+          gameManager.setPotionShakeMultiplier(1);
         });
       case 7:
         // Freezing potion
-        Provider.of<GameManager>(context, listen: false).setIsFrozen(true);
+        gameManager.setIsFrozen(true);
         createTimedEffect(
             'Frozen', Constants.potionEffectValues[potionId]!['Duration']!, () {
-          Provider.of<GameManager>(context, listen: false).setIsFrozen(false);
+          gameManager.setIsFrozen(false);
         });
         break;
+      case 8:
+        // Shield potion
+        gameManager.setHasShield(true);
+        gameManager.addPlayerActiveEffect('Shielded');
+        notifyEffect('Shielded', false);
     }
   }
 

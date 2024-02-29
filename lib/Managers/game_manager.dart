@@ -20,6 +20,7 @@ class GameManager extends ChangeNotifier {
   bool _isBlinded = false;
   double _potionShakeMultiplier = 1;
   bool _isFrozen = false;
+  bool _hasShield = false;
 
   /// Game related
   String get gamestate => _gamestate;
@@ -42,6 +43,7 @@ class GameManager extends ChangeNotifier {
   bool get isBlinded => _isBlinded;
   double get potionShakeMultiplier => _potionShakeMultiplier;
   bool get isFrozen => _isFrozen;
+  bool get hasShield => _hasShield;
 
   /// Game related
   void changeGamestate(String value) {
@@ -158,6 +160,11 @@ class GameManager extends ChangeNotifier {
 
   void setIsFrozen(bool value) {
     _isFrozen = value;
+    notifyListeners();
+  }
+
+  void setHasShield(bool value) {
+    _hasShield = value;
     notifyListeners();
   }
 }

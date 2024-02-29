@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Global/player.dart';
@@ -247,6 +248,19 @@ class _WizardViewState extends State<WizardView> {
           gameManager.setDamageMultiplier(1);
         });
         break;
+      case 11:
+        // Potion of clumsiness
+        final ingredients = gameManager.ingredients;
+        final random = Random();
+        final ingredient = ingredients[random.nextInt(ingredients.length)];
+        gameManager.removeIngredient(ingredient);
+      case 12:
+        // Potion of purity
+        final effects = gameManager.playerActiveEffects;
+        final random = Random();
+        final effect =
+            gameManager.playerActiveEffects[random.nextInt(effects.length)];
+        removeActiveEffect(effect);
     }
   }
 

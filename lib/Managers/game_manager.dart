@@ -104,6 +104,12 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeIngredient(int ingredient) {
+    _playerActiveEffects
+        .removeWhere((element) => element == ingredient.toString());
+    notifyListeners();
+  }
+
   void emptyIngredients() {
     _ingredients = [];
     notifyListeners();

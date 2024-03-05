@@ -32,6 +32,7 @@ class _ChallengePageState extends State<ChallengePage> {
               ? (Player().opponentName == '')
                   ? MainChallengeView(
                       challengeOpponent: challengeOpponent,
+                      displaySnackBar: displaySnackBar,
                     )
                   : ChallengeIncomingView(
                       rejectChallenge: rejectChallenge,
@@ -207,9 +208,14 @@ class _ChallengePageState extends State<ChallengePage> {
     startGame();
   }
 
-  void startGame() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const GamePage()));
+  void startGame() async {
+    if (Player().isManager) {
+      await supabase.removeChannel(_duelChannel);
+    }
+    if (context.mounted) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const GamePage()));
+    }
   }
 
   void displaySnackBar(String message, int seconds) {

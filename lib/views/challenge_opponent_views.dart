@@ -2,9 +2,13 @@ import 'package:brew_battles/Global/player.dart';
 import 'package:flutter/material.dart';
 
 class MainChallengeView extends StatelessWidget {
-  MainChallengeView({super.key, required this.challengeOpponent});
+  MainChallengeView(
+      {super.key,
+      required this.challengeOpponent,
+      required this.displaySnackBar});
   final TextEditingController inputFieldController = TextEditingController();
   final Function challengeOpponent;
+  final Function displaySnackBar;
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +27,13 @@ class MainChallengeView extends StatelessWidget {
             foregroundColor: MaterialStateProperty.all<Color>(
                 Theme.of(context).colorScheme.onPrimary),
           ),
-          onPressed: () {
+          onPressed: () async {
             FocusManager.instance.primaryFocus?.unfocus();
-            challengeOpponent(inputFieldController.text);
+            try {
+              await challengeOpponent(inputFieldController.text);
+            } catch (_) {
+              displaySnackBar('Couldn\'t find your opponent', 3);
+            }
           },
           child: const Text('Challenge Opponent'),
         )

@@ -15,8 +15,8 @@ class GameManager extends ChangeNotifier {
   int _finishedPotionId = 0;
 
   /// Effect related
-  final List<String> _playerActiveEffects = [];
-  final List<String> _opponentActiveEffects = [];
+  List<String> _playerActiveEffects = [];
+  List<String> _opponentActiveEffects = [];
   bool _isBlinded = false;
   double _potionShakeMultiplier = 1;
   bool _isFrozen = false;
@@ -87,8 +87,8 @@ class GameManager extends ChangeNotifier {
 
   void resetAll() {
     emptyPotion();
-    _playerActiveEffects.clear();
-    _opponentActiveEffects.clear();
+    _playerActiveEffects = [];
+    _opponentActiveEffects = [];
     setPlayerActionText(''); // Remove later
     setOpponentActionText(''); // Remove later
   }

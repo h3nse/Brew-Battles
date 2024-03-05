@@ -146,11 +146,11 @@ class Constants {
     9: 'Potion of vulnerability',
     10: 'Potion of toughness',
     11: 'Potion of clumsiness',
-    12: 'Potion of blessing'
+    12: 'Potion of purity'
   };
 
-  static const int msPotionShakeInterval = 1500;
-  static const int potionShakeThreshold = 10;
+  static const int msPotionShakeInterval = 2500;
+  static const int potionShakeThreshold = 15;
   static const int maxMixLevel = 10;
 
   static const List<List> potions = [
@@ -207,13 +207,13 @@ class Constants {
   static const Map<int, Map<String, dynamic>> potionEffectValues = {
     0: {},
     1: {'Heal': 10.0},
-    2: {'Damage': 10.0},
-    3: {'TickSpeed': 2, 'TickAmount': 20, 'TickDamage': 2.0},
+    2: {'Damage': 100.0},
+    3: {'TickSpeed': 2, 'TickAmount': 10, 'TickDamage': 2.0},
     4: {'Duration': 20},
     5: {'Multiplier': 2.0, 'Duration': 20},
     6: {'Multiplier': 0.5, 'Duration': 20},
     7: {'Duration': 15},
-    9: {'Multiplier': 2.0, 'Duration': 40},
+    9: {'Multiplier': 2.0, 'Duration': 20},
     10: {'Multiplier': 0.5, 'Duration': 20},
   };
 

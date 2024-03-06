@@ -1,8 +1,14 @@
+import 'package:brew_battles/Managers/game_manager.dart';
+
 abstract class Potion {
   int id;
   String name;
+  late GameManager gameManager;
 
   Potion(this.id, this.name);
+  void setGameManager(GameManager gameManager) {
+    this.gameManager = gameManager;
+  }
 
   void applyPotion();
 }
@@ -25,7 +31,9 @@ class ExplodingPotion extends Potion {
   ExplodingPotion() : super(2, "Exploding Potion");
 
   @override
-  void applyPotion() {}
+  void applyPotion() {
+    print('Applied exploding potion');
+  }
 }
 
 class PotionOfFire extends Potion {

@@ -120,7 +120,7 @@ class GameManager extends ChangeNotifier {
   String _potionState = 'empty';
   List<int> _ingredients = [];
   double _mixLevel = 0;
-  Potion _finishedPotion = DefaultPotion();
+  late Potion _finishedPotion;
   double _potionShakeMultiplier = 1;
 
   String get potionState => _potionState;
@@ -160,8 +160,14 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeFinishedPotionId(Potion potion) {
+  void changeFinishedPotion(Potion potion) {
     _finishedPotion = potion;
+    notifyListeners();
+  }
+
+  void resetFinishedPotion() {
+    _finishedPotion.id = 0;
+    _finishedPotion.name = '';
     notifyListeners();
   }
 
@@ -174,7 +180,7 @@ class GameManager extends ChangeNotifier {
     changePotionState('empty');
     emptyIngredients();
     resetMixLevel();
-    changeFinishedPotionId(DefaultPotion());
+    resetFinishedPotion();
   }
 
   void resetAll() {

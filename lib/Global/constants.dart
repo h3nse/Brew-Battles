@@ -135,7 +135,7 @@ class Constants {
     10: 'Lightning in a bottle'
   };
 
-  static Map<int, dynamic> idToPotions = {
+  static Map<int, Potion> idToPotions = {
     0: DefaultPotion(),
     1: PotionOfHealing(),
     2: ExplodingPotion(),

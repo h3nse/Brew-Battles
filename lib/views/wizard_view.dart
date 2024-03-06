@@ -117,14 +117,14 @@ class _WizardViewState extends State<WizardView> {
       callback: (payload) => {
         if (payload['isThrown'])
           {
-            applyPotion(Constants.idToPotions[payload['potionId']]),
+            applyPotion(Constants.idToPotions[payload['potionId']]!),
             gameManager.setOpponentActionText(
-                'threw ${Constants.idToPotions[payload['potionId']].name}'),
+                'threw ${Constants.idToPotions[payload['potionId']]!.name}'),
           }
         else
           {
             gameManager.setOpponentActionText(
-                'drank ${Constants.idToPotions[payload['potionId']].name}')
+                'drank ${Constants.idToPotions[payload['potionId']]!.name}')
           }
       },
     );

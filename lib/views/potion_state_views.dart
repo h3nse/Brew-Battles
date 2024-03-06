@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:brew_battles/Global/potions.dart';
 import 'package:flutter/material.dart';
 import 'package:brew_battles/Global/constants.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -79,7 +80,10 @@ class _MixingPotionState extends State<MixingPotion> {
         break;
       }
     }
-    gameManager.changeFinishedPotionId(Constants.idToPotions[potionId]);
+    final potion = Constants.idToPotions[potionId] ?? DefaultPotion();
+    potion.setGameManager(gameManager);
+    print(potion.name);
+    gameManager.changeFinishedPotion(potion);
   }
 
   @override
@@ -92,9 +96,7 @@ class _MixingPotionState extends State<MixingPotion> {
           event.y.abs() > Constants.potionShakeThreshold ||
           event.z.abs() > Constants.potionShakeThreshold) {
         final gameManager = Provider.of<GameManager>(context, listen: false);
-        gameManager.increaseMixLevel(
-            Provider.of<GameManager>(context, listen: false)
-                .potionShakeMultiplier);
+        gameManager.increaseMixLevel(gameManager.potionShakeMultiplier);
         if (gameManager.mixLevel >= Constants.maxMixLevel) {
           createPotion();
           gameManager.changePotionState('finished');

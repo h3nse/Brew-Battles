@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Global/player.dart';
+import 'package:brew_battles/Global/potions.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +19,7 @@ class WizardView extends StatefulWidget {
 
 class _WizardViewState extends State<WizardView> {
   late final RealtimeChannel _duelChannel;
+  late final GameManager gameManager;
   bool playerDead = false;
   bool opponentDead = false;
   List activeEffectTimers = [];
@@ -101,7 +102,7 @@ class _WizardViewState extends State<WizardView> {
 
   @override
   void initState() {
-    final gameManager = Provider.of<GameManager>(context, listen: false);
+    gameManager = Provider.of<GameManager>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       gameManager.setPlayerHealth(Constants.initialHealth);
       gameManager.setOpponentHealth(Constants.initialHealth);
@@ -116,16 +117,14 @@ class _WizardViewState extends State<WizardView> {
       callback: (payload) => {
         if (payload['isThrown'])
           {
-            applyPotion(payload['potionId']),
-            Provider.of<GameManager>(context, listen: false)
-                .setOpponentActionText(
-                    'threw ${Constants.idToPotions[payload['potionId']]!}'),
+            applyPotion(Constants.idToPotions[payload['potionId']]),
+            gameManager.setOpponentActionText(
+                'threw ${Constants.idToPotions[payload['potionId']].name}'),
           }
         else
           {
-            Provider.of<GameManager>(context, listen: false)
-                .setOpponentActionText(
-                    'drank ${Constants.idToPotions[payload['potionId']]!}')
+            gameManager.setOpponentActionText(
+                'drank ${Constants.idToPotions[payload['potionId']].name}')
           }
       },
     );
@@ -144,124 +143,122 @@ class _WizardViewState extends State<WizardView> {
   }
 
   /// Potion Application
-  void drinkPotion(int potionId) {
+  void drinkPotion(Potion potion) {
     // Replace with animation
-    Provider.of<GameManager>(context, listen: false)
-        .setPlayerActionText('drank ${Constants.idToPotions[potionId]!}');
+    gameManager.setPlayerActionText('drank ${potion.name}');
 
-    applyPotion(potionId);
-    notifyPotionAction(potionId, false);
+    applyPotion(potion);
+    notifyPotionAction(potion.id, false);
   }
 
-  void throwPotion(int potionId) {
+  void throwPotion(Potion potion) {
     // Replace with animation
-    Provider.of<GameManager>(context, listen: false)
-        .setPlayerActionText('threw ${Constants.idToPotions[potionId]!}');
+    gameManager.setPlayerActionText('threw ${potion.name}');
 
-    notifyPotionAction(potionId, true);
+    notifyPotionAction(potion.id, true);
   }
 
   /// where each potions effect is programmed
-  void applyPotion(int potionId) {
-    final gameManager = Provider.of<GameManager>(context, listen: false);
+  void applyPotion(Potion potion) {
     if (gameManager.hasShield) {
       gameManager.setHasShield(false);
       gameManager.removePlayerActiveEffect('Shielded');
       notifyEffect('Shielded', true);
       return;
     }
-    switch (potionId) {
-      case 1:
-        // Healing potion
-        heal(Constants.potionEffectValues[potionId]!['Heal']!);
-        break;
-      case 2:
-        // Explosion potion
-        takeDamage(Constants.potionEffectValues[potionId]!['Damage']!);
-        break;
-      case 3:
-        // Fire potion
-        createPeriodicEffect(
-          'Burning',
-          Constants.potionEffectValues[potionId]!['TickSpeed']!,
-          Constants.potionEffectValues[potionId]!['TickAmount']!,
-          () => takeDamage(
-              Constants.potionEffectValues[potionId]!['TickDamage']!),
-        );
-        break;
-      case 4:
-        // Potion of blindness
-        gameManager.setIsBlinded(true);
-        createTimedEffect(
-            'Blinded', Constants.potionEffectValues[potionId]!['Duration']!,
-            () {
-          gameManager.setIsBlinded(false);
-        });
-        break;
-      case 5:
-        // Haste potion
-        gameManager.setPotionShakeMultiplier(
-            Constants.potionEffectValues[potionId]!['Multiplier']);
-        createTimedEffect(
-            'Hasted', Constants.potionEffectValues[potionId]!['Duration'], () {
-          gameManager.setPotionShakeMultiplier(1);
-        });
-        break;
-      case 6:
-        // Slowness potion
-        gameManager.setPotionShakeMultiplier(
-            Constants.potionEffectValues[potionId]!['Multiplier']);
-        createTimedEffect(
-            'Slowed', Constants.potionEffectValues[potionId]!['Duration'], () {
-          gameManager.setPotionShakeMultiplier(1);
-        });
-      case 7:
-        // Freezing potion
-        gameManager.setIsFrozen(true);
-        createTimedEffect(
-            'Frozen', Constants.potionEffectValues[potionId]!['Duration']!, () {
-          gameManager.setIsFrozen(false);
-        });
-        break;
-      case 8:
-        // Shield potion
-        gameManager.setHasShield(true);
-        gameManager.addPlayerActiveEffect('Shielded');
-        notifyEffect('Shielded', false);
-      case 9:
-        // Potion of vulnerability
-        gameManager.setDamageMultiplier(
-            Constants.potionEffectValues[potionId]!['Multiplier']);
-        createTimedEffect(
-            'Vulnerable', Constants.potionEffectValues[potionId]!['Duration'],
-            () {
-          gameManager.setDamageMultiplier(1);
-        });
-        break;
-      case 10:
-        // Potion of toughness
-        gameManager.setDamageMultiplier(
-            Constants.potionEffectValues[potionId]!['Multiplier']);
-        createTimedEffect(
-            'Vulnerable', Constants.potionEffectValues[potionId]!['Duration'],
-            () {
-          gameManager.setDamageMultiplier(1);
-        });
-        break;
-      case 11:
-        // Potion of clumsiness
-        final ingredients = gameManager.ingredients;
-        final random = Random();
-        final ingredient = ingredients[random.nextInt(ingredients.length)];
-        gameManager.removeIngredient(ingredient);
-      case 12:
-        // Potion of purity
-        final effects = gameManager.playerActiveEffects;
-        final random = Random();
-        final effect =
-            gameManager.playerActiveEffects[random.nextInt(effects.length)];
-        removeActiveEffect(effect);
-    }
+    potion.applyPotion();
+    // switch (potionId) {
+    //   case 1:
+    //     // Healing potion
+    //     heal(Constants.potionEffectValues[potionId]!['Heal']!);
+    //     break;
+    //   case 2:
+    //     // Explosion potion
+    //     takeDamage(Constants.potionEffectValues[potionId]!['Damage']!);
+    //     break;
+    //   case 3:
+    //     // Fire potion
+    //     createPeriodicEffect(
+    //       'Burning',
+    //       Constants.potionEffectValues[potionId]!['TickSpeed']!,
+    //       Constants.potionEffectValues[potionId]!['TickAmount']!,
+    //       () => takeDamage(
+    //           Constants.potionEffectValues[potionId]!['TickDamage']!),
+    //     );
+    //     break;
+    //   case 4:
+    //     // Potion of blindness
+    //     gameManager.setIsBlinded(true);
+    //     createTimedEffect(
+    //         'Blinded', Constants.potionEffectValues[potionId]!['Duration']!,
+    //         () {
+    //       gameManager.setIsBlinded(false);
+    //     });
+    //     break;
+    //   case 5:
+    //     // Haste potion
+    //     gameManager.setPotionShakeMultiplier(
+    //         Constants.potionEffectValues[potionId]!['Multiplier']);
+    //     createTimedEffect(
+    //         'Hasted', Constants.potionEffectValues[potionId]!['Duration'], () {
+    //       gameManager.setPotionShakeMultiplier(1);
+    //     });
+    //     break;
+    //   case 6:
+    //     // Slowness potion
+    //     gameManager.setPotionShakeMultiplier(
+    //         Constants.potionEffectValues[potionId]!['Multiplier']);
+    //     createTimedEffect(
+    //         'Slowed', Constants.potionEffectValues[potionId]!['Duration'], () {
+    //       gameManager.setPotionShakeMultiplier(1);
+    //     });
+    //   case 7:
+    //     // Freezing potion
+    //     gameManager.setIsFrozen(true);
+    //     createTimedEffect(
+    //         'Frozen', Constants.potionEffectValues[potionId]!['Duration']!, () {
+    //       gameManager.setIsFrozen(false);
+    //     });
+    //     break;
+    //   case 8:
+    //     // Shield potion
+    //     gameManager.setHasShield(true);
+    //     gameManager.addPlayerActiveEffect('Shielded');
+    //     notifyEffect('Shielded', false);
+    //   case 9:
+    //     // Potion of vulnerability
+    //     gameManager.setDamageMultiplier(
+    //         Constants.potionEffectValues[potionId]!['Multiplier']);
+    //     createTimedEffect(
+    //         'Vulnerable', Constants.potionEffectValues[potionId]!['Duration'],
+    //         () {
+    //       gameManager.setDamageMultiplier(1);
+    //     });
+    //     break;
+    //   case 10:
+    //     // Potion of toughness
+    //     gameManager.setDamageMultiplier(
+    //         Constants.potionEffectValues[potionId]!['Multiplier']);
+    //     createTimedEffect(
+    //         'Vulnerable', Constants.potionEffectValues[potionId]!['Duration'],
+    //         () {
+    //       gameManager.setDamageMultiplier(1);
+    //     });
+    //     break;
+    //   case 11:
+    //     // Potion of clumsiness
+    //     final ingredients = gameManager.ingredients;
+    //     final random = Random();
+    //     final ingredient = ingredients[random.nextInt(ingredients.length)];
+    //     gameManager.removeIngredient(ingredient);
+    //   case 12:
+    //     // Potion of purity
+    //     final effects = gameManager.playerActiveEffects;
+    //     final random = Random();
+    //     final effect =
+    //         gameManager.playerActiveEffects[random.nextInt(effects.length)];
+    //     removeActiveEffect(effect);
+    // }
   }
 
   void wizardDied(bool self) {
@@ -277,14 +274,14 @@ class _WizardViewState extends State<WizardView> {
         opponentDead = true;
       });
     }
-    Provider.of<GameManager>(context, listen: false).changeWinner(winner);
+    gameManager.changeWinner(winner);
     Timer(const Duration(seconds: Constants.endDurationSec), () {
       endGame();
     });
   }
 
   void endGame() async {
-    Provider.of<GameManager>(context, listen: false).resetAll();
+    gameManager.resetAll();
     if (Player().isManager) {
       await supabase
           .from('duels')
@@ -315,26 +312,23 @@ class _WizardViewState extends State<WizardView> {
 
   /// Effects
   void takeDamage(double amount) {
-    amount = amount *
-        Provider.of<GameManager>(context, listen: false).damageMultiplier;
-    Provider.of<GameManager>(context, listen: false)
-        .changePlayerHealth(-amount);
-    if (Provider.of<GameManager>(context, listen: false).playerHealth <= 0) {
-      Provider.of<GameManager>(context, listen: false).setPlayerHealth(0);
+    amount = amount * gameManager.damageMultiplier;
+    gameManager.changePlayerHealth(-amount);
+    if (gameManager.playerHealth <= 0) {
+      gameManager.setPlayerHealth(0);
       wizardDied(true);
       notifyDeath();
     }
-    notifyHealth(Provider.of<GameManager>(context, listen: false).playerHealth);
+    notifyHealth(gameManager.playerHealth);
   }
 
   void heal(double amount) {
-    amount = amount *
-        Provider.of<GameManager>(context, listen: false).healMultiplier;
-    Provider.of<GameManager>(context, listen: false).changePlayerHealth(amount);
-    if (Provider.of<GameManager>(context, listen: false).playerHealth > 100) {
-      Provider.of<GameManager>(context, listen: false).setPlayerHealth(100);
+    amount = amount * gameManager.healMultiplier;
+    gameManager.changePlayerHealth(amount);
+    if (gameManager.playerHealth > 100) {
+      gameManager.setPlayerHealth(100);
     }
-    notifyHealth(Provider.of<GameManager>(context, listen: false).playerHealth);
+    notifyHealth(gameManager.playerHealth);
   }
 
   void createPeriodicEffect(
@@ -352,8 +346,7 @@ class _WizardViewState extends State<WizardView> {
       },
     );
     activeEffectTimers.add([effect, timer]);
-    Provider.of<GameManager>(context, listen: false)
-        .addPlayerActiveEffect(effect);
+    gameManager.addPlayerActiveEffect(effect);
     notifyEffect(effect, false);
   }
 
@@ -364,8 +357,7 @@ class _WizardViewState extends State<WizardView> {
       removeActiveEffect(effect);
     });
     activeEffectTimers.add([effect, timer]);
-    Provider.of<GameManager>(context, listen: false)
-        .addPlayerActiveEffect(effect);
+    gameManager.addPlayerActiveEffect(effect);
     notifyEffect(effect, false);
   }
 
@@ -374,8 +366,7 @@ class _WizardViewState extends State<WizardView> {
       if (activeEffectTimers[i][0] == effect) {
         activeEffectTimers[i][1].cancel();
         activeEffectTimers.removeAt(i);
-        Provider.of<GameManager>(context, listen: false)
-            .removePlayerActiveEffect(effect);
+        gameManager.removePlayerActiveEffect(effect);
         notifyEffect(effect, true);
       }
     }

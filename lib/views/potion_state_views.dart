@@ -79,7 +79,7 @@ class _MixingPotionState extends State<MixingPotion> {
         break;
       }
     }
-    gameManager.changeFinishedPotionId(potionId);
+    gameManager.changeFinishedPotionId(Constants.idToPotions[potionId]);
   }
 
   @override
@@ -125,7 +125,7 @@ class FinishedPotion extends StatelessWidget {
       child: Consumer<GameManager>(
         builder: (context, gameManager, child) {
           return (!gameManager.isBlinded)
-              ? Text(Constants.idToPotions[gameManager.finishedPotion]!)
+              ? Text(gameManager.finishedPotion.name)
               : const Text('A Hazy Fog Obscures Your potion');
         },
       ),

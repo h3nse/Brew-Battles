@@ -1,3 +1,5 @@
+import 'package:brew_battles/Global/potions.dart';
+
 class Constants {
   static const Map<String, List> randomWords = {
     'first words': [
@@ -133,20 +135,11 @@ class Constants {
     10: 'Lightning in a bottle'
   };
 
-  static const Map<int, String> idToPotions = {
-    0: 'Default Potion',
-    1: 'Potion of healing',
-    2: 'Exploding Potion',
-    3: 'Potion of fire',
-    4: 'Potion of blindness',
-    5: 'Haste potion',
-    6: 'Slowness potion',
-    7: 'Freezing potion',
-    8: 'Shied potion',
-    9: 'Potion of vulnerability',
-    10: 'Potion of toughness',
-    11: 'Potion of clumsiness',
-    12: 'Potion of purity'
+  static Map<int, dynamic> idToPotions = {
+    0: DefaultPotion(),
+    1: PotionOfHealing(),
+    2: ExplodingPotion(),
+    3: PotionOfFire(),
   };
 
   static const int msPotionShakeInterval = 2500;

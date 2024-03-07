@@ -116,27 +116,28 @@ class _WizardViewState extends State<WizardView> {
             gameManager.setOpponentHealth(payload['health']));
     _duelChannel.onBroadcast(
       event: 'potion_update',
-      callback: (payload) => {
-        if (payload['isThrown'])
-          {
-            applyPotion(Constants.idToPotions[payload['potionId']]!),
-            gameManager.setOpponentActionText(
-                'threw ${Constants.idToPotions[payload['potionId']]!.name}'),
-          }
-        else
-          {
-            gameManager.setOpponentActionText(
-                'drank ${Constants.idToPotions[payload['potionId']]!.name}')
-          }
+      callback: (payload) {
+        print(payload);
+        if (payload['isThrown']) {
+          final potion = Constants.idToPotions[payload['potionId']]!;
+          potion.setGameManager(gameManager);
+          applyPotion(potion);
+          gameManager.setOpponentActionText(
+              'threw ${Constants.idToPotions[payload['potionId']]!.name}');
+        } else {
+          gameManager.setOpponentActionText(
+              'drank ${Constants.idToPotions[payload['potionId']]!.name}');
+        }
       },
     );
     _duelChannel.onBroadcast(
       event: 'effect_update',
-      callback: (payload) => {
-        if (payload['remove'])
-          {gameManager.removeOpponentActiveEffect(payload['effect'])}
-        else
-          {gameManager.addOpponentActiveEffect(payload['effect'])},
+      callback: (payload) {
+        if (payload['remove']) {
+          gameManager.removeOpponentActiveEffect(payload['effect']);
+        } else {
+          gameManager.addOpponentActiveEffect(payload['effect']);
+        }
       },
     );
     _duelChannel.onBroadcast(

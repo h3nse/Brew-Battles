@@ -22,7 +22,6 @@ class _WizardViewState extends State<WizardView> {
   late final GameManager gameManager;
   bool playerDead = false;
   bool opponentDead = false;
-  List activeEffectTimers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +37,6 @@ class _WizardViewState extends State<WizardView> {
                   return;
                 }
                 drinkPotion(gameManager.finishedPotion);
-                gameManager.emptyPotion();
               },
               child: SizedBox(
                 height: 200,
@@ -55,7 +53,8 @@ class _WizardViewState extends State<WizardView> {
                                 (!(gameManager.playerActionText == ''))
                                     ? Text(gameManager.playerActionText)
                                     : Container(),
-                                Text(gameManager.playerActiveEffects.toString())
+                                Text(gameManager.playerActiveEffectNames
+                                    .toString())
                               ],
                             )
                           : const Text('Dead')),
@@ -86,7 +85,7 @@ class _WizardViewState extends State<WizardView> {
                                 (!(gameManager.opponentActionText == ''))
                                     ? Text(gameManager.opponentActionText)
                                     : Container(),
-                                Text(gameManager.opponentActiveEffects
+                                Text(gameManager.opponentActiveEffectNames
                                     .toString())
                               ],
                             )
@@ -107,8 +106,7 @@ class _WizardViewState extends State<WizardView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       gameManager.setPlayerHealth(Constants.initialHealth);
       gameManager.setOpponentHealth(Constants.initialHealth);
-      gameManager.setBroadcastChannel(_duelChannel);
-      gameManager.setOnDeathCallback(wizardDied);
+      gameManager.setup(_duelChannel, wizardDied);
     });
     _duelChannel.onBroadcast(
         event: 'health_update',
@@ -117,7 +115,6 @@ class _WizardViewState extends State<WizardView> {
     _duelChannel.onBroadcast(
       event: 'potion_update',
       callback: (payload) {
-        print(payload);
         if (payload['isThrown']) {
           final potion = Constants.idToPotions[payload['potionId']]!;
           potion.setGameManager(gameManager);
@@ -147,6 +144,8 @@ class _WizardViewState extends State<WizardView> {
 
   /// Potion Application
   void drinkPotion(Potion potion) {
+    gameManager.emptyPotion();
+
     // Replace with animation
     gameManager.setPlayerActionText('drank ${potion.name}');
 
@@ -165,7 +164,7 @@ class _WizardViewState extends State<WizardView> {
   void applyPotion(Potion potion) {
     if (gameManager.hasShield) {
       gameManager.setHasShield(false);
-      gameManager.removePlayerActiveEffect('Shielded');
+      gameManager.removePlayerEffect('Shielded');
       gameManager.notifyEffect('Shielded', true);
       return;
     }
@@ -267,6 +266,7 @@ class _WizardViewState extends State<WizardView> {
   void wizardDied(bool self) {
     String winner;
     if (self) {
+      gameManager.removeAllPlayerEffects();
       winner = Player().opponentName;
       setState(() {
         playerDead = true;
@@ -292,44 +292,44 @@ class _WizardViewState extends State<WizardView> {
     }
   }
 
-  void createPeriodicEffect(
-      String effect, int tickSpeed, int tickAmount, Function onTimeout) {
-    removeActiveEffect(effect);
-    int tickCount = 0;
-    final timer = Timer.periodic(
-      Duration(seconds: tickSpeed),
-      (timer) {
-        onTimeout();
-        tickCount += 1;
-        if (tickCount == tickAmount) {
-          removeActiveEffect(effect);
-        }
-      },
-    );
-    activeEffectTimers.add([effect, timer]);
-    gameManager.addPlayerActiveEffect(effect);
-    gameManager.notifyEffect(effect, false);
-  }
+  // void createPeriodicEffect(
+  //     String effect, int tickSpeed, int tickAmount, Function onTimeout) {
+  //   removeActiveEffect(effect);
+  //   int tickCount = 0;
+  //   final timer = Timer.periodic(
+  //     Duration(seconds: tickSpeed),
+  //     (timer) {
+  //       onTimeout();
+  //       tickCount += 1;
+  //       if (tickCount == tickAmount) {
+  //         removeActiveEffect(effect);
+  //       }
+  //     },
+  //   );
+  //   activeEffectTimers.add([effect, timer]);
+  //   gameManager.addPlayerActiveEffect(effect);
+  //   gameManager.notifyEffect(effect, false);
+  // }
 
-  void createTimedEffect(String effect, int duration, Function onTimeout) {
-    removeActiveEffect(effect);
-    final timer = Timer(Duration(seconds: duration), () {
-      onTimeout();
-      removeActiveEffect(effect);
-    });
-    activeEffectTimers.add([effect, timer]);
-    gameManager.addPlayerActiveEffect(effect);
-    gameManager.notifyEffect(effect, false);
-  }
+  // void createTimedEffect(String effect, int duration, Function onTimeout) {
+  //   removeActiveEffect(effect);
+  //   final timer = Timer(Duration(seconds: duration), () {
+  //     onTimeout();
+  //     removeActiveEffect(effect);
+  //   });
+  //   activeEffectTimers.add([effect, timer]);
+  //   gameManager.addPlayerActiveEffect(effect);
+  //   gameManager.notifyEffect(effect, false);
+  // }
 
-  void removeActiveEffect(String effect) {
-    for (var i = 0; i < activeEffectTimers.length; i++) {
-      if (activeEffectTimers[i][0] == effect) {
-        activeEffectTimers[i][1].cancel();
-        activeEffectTimers.removeAt(i);
-        gameManager.removePlayerActiveEffect(effect);
-        gameManager.notifyEffect(effect, true);
-      }
-    }
-  }
+  // void removeActiveEffect(String effect) {
+  //   for (var i = 0; i < activeEffectTimers.length; i++) {
+  //     if (activeEffectTimers[i][0] == effect) {
+  //       activeEffectTimers[i][1].cancel();
+  //       activeEffectTimers.removeAt(i);
+  //       gameManager.removePlayerActiveEffect(effect);
+  //       gameManager.notifyEffect(effect, true);
+  //     }
+  //   }
+  // }
 }

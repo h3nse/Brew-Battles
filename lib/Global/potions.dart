@@ -1,4 +1,5 @@
 import 'package:brew_battles/Global/constants.dart';
+import 'package:brew_battles/Global/effects.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
 
 abstract class Potion {
@@ -43,5 +44,9 @@ class PotionOfFire extends Potion {
   PotionOfFire() : super(3, "Potion of Fire");
 
   @override
-  void applyPotion() {}
+  void applyPotion() {
+    final burningEffect = Burning();
+    burningEffect.setGameManager(gameManager);
+    gameManager.addPlayerEffect(burningEffect);
+  }
 }

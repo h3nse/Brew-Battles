@@ -200,7 +200,7 @@ class Constants {
   static const Map<int, Map<String, dynamic>> potionEffectValues = {
     0: {},
     1: {'Heal': 10.0},
-    2: {'Damage': -90.0},
+    2: {'Damage': -10.0},
     3: {'TickSpeed': 2, 'TickAmount': 10, 'TickDamage': -2.0},
     4: {'Duration': 20},
     5: {'Multiplier': 2.0, 'Duration': 20},
@@ -208,6 +208,10 @@ class Constants {
     7: {'Duration': 15},
     9: {'Multiplier': 2.0, 'Duration': 20},
     10: {'Multiplier': 0.5, 'Duration': 20},
+  };
+
+  static const Map<String, Map<String, dynamic>> effectValues = {
+    'Burning': {'TickSpeed': 2, 'TickDamage': -2.0}
   };
 
   static const int endDurationSec = 5;

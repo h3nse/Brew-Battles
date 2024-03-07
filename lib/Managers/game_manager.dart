@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:brew_battles/Global/constants.dart';
+import 'package:brew_battles/Global/effects.dart';
 import 'package:brew_battles/Global/potions.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,6 +21,11 @@ class GameManager extends ChangeNotifier {
   void changeGamestate(String value) {
     _gamestate = value;
     notifyListeners();
+  }
+
+  void setup(RealtimeChannel channel, Function onDeath) {
+    setBroadcastChannel(channel);
+    setOnDeathCallback(onDeath);
   }
 
   void setBroadcastChannel(RealtimeChannel channel) {
@@ -58,8 +66,9 @@ class GameManager extends ChangeNotifier {
   double _opponentHealth = 0;
   String _playerActionText = ''; // Temp until we have animations
   String _opponentActionText = ''; // Temp until we have animations
-  List<String> _playerActiveEffects = [];
-  List<String> _opponentActiveEffects = [];
+  List<Effect> _playerActiveEffects = [];
+  List<String> _playerActiveEffectNames = [];
+  List<String> _opponentActiveEffectNames = [];
   bool _isBlinded = false;
   bool _isFrozen = false;
   bool _hasShield = false;
@@ -72,8 +81,9 @@ class GameManager extends ChangeNotifier {
       _playerActionText; // Temp until we have animations
   String get opponentActionText =>
       _opponentActionText; // Temp until we have animations
-  List<String> get playerActiveEffects => _playerActiveEffects;
-  List<String> get opponentActiveEffects => _opponentActiveEffects;
+  List<Effect> get playerActiveEffects => _playerActiveEffects;
+  List<String> get playerActiveEffectNames => _playerActiveEffectNames;
+  List<String> get opponentActiveEffectNames => _opponentActiveEffectNames;
   bool get isBlinded => _isBlinded;
   bool get isFrozen => _isFrozen;
   bool get hasShield => _hasShield;
@@ -126,23 +136,51 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   } // Remove when we have animations
 
-  void addPlayerActiveEffect(String effect) {
+  Timer createPeriodicEffect(int tickSpeed, Function onTimeout) {
+    final timer = Timer.periodic(
+      Duration(seconds: tickSpeed),
+      (timer) {
+        onTimeout();
+      },
+    );
+    return timer;
+  }
+
+  void addPlayerEffect(Effect effect) {
+    removePlayerEffect(effect.name);
+    effect.startEffect();
     _playerActiveEffects.add(effect);
+    _playerActiveEffectNames.add(effect.name);
+    notifyEffect(effect.name, false);
+    notifyListeners();
+  }
+
+  void removePlayerEffect(String effectName) {
+    _playerActiveEffects
+        .firstWhere((element) => element.name == effectName,
+            orElse: () => PlaceHolderEffect())
+        .endEffect();
+    _playerActiveEffects.removeWhere((element) => element.name == effectName);
+    _playerActiveEffectNames.removeWhere((element) => element == effectName);
+    notifyListeners();
+  }
+
+  void removeAllPlayerEffects() {
+    for (var effect in _playerActiveEffects) {
+      effect.endEffect();
+    }
+    _playerActiveEffects = [];
+    _playerActiveEffectNames = [];
     notifyListeners();
   }
 
   void addOpponentActiveEffect(String effect) {
-    _opponentActiveEffects.add(effect);
-    notifyListeners();
-  }
-
-  void removePlayerActiveEffect(String effect) {
-    _playerActiveEffects.removeWhere((element) => element == effect);
+    _opponentActiveEffectNames.add(effect);
     notifyListeners();
   }
 
   void removeOpponentActiveEffect(String effect) {
-    _opponentActiveEffects.removeWhere((element) => element == effect);
+    _opponentActiveEffectNames.removeWhere((element) => element == effect);
     notifyListeners();
   }
 
@@ -195,8 +233,7 @@ class GameManager extends ChangeNotifier {
   }
 
   void removeIngredient(int ingredient) {
-    _playerActiveEffects
-        .removeWhere((element) => element == ingredient.toString());
+    _ingredients.removeWhere((element) => element == ingredient);
     notifyListeners();
   }
 
@@ -240,7 +277,7 @@ class GameManager extends ChangeNotifier {
   void resetAll() {
     emptyPotion();
     _playerActiveEffects = [];
-    _opponentActiveEffects = [];
+    _opponentActiveEffectNames = [];
     setPlayerActionText(''); // Remove later
     setOpponentActionText(''); // Remove later
   }

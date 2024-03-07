@@ -1,3 +1,4 @@
+import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
 
 abstract class Potion {
@@ -24,7 +25,9 @@ class PotionOfHealing extends Potion {
   PotionOfHealing() : super(1, "Potion of Healing");
 
   @override
-  void applyPotion() {}
+  void applyPotion() {
+    gameManager.heal(Constants.potionEffectValues[id]!['Heal']);
+  }
 }
 
 class ExplodingPotion extends Potion {
@@ -32,7 +35,7 @@ class ExplodingPotion extends Potion {
 
   @override
   void applyPotion() {
-    print('Applied exploding potion');
+    gameManager.takeDamage(Constants.potionEffectValues[id]!['Damage']);
   }
 }
 

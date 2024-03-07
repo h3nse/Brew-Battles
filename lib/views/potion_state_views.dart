@@ -82,7 +82,6 @@ class _MixingPotionState extends State<MixingPotion> {
     }
     final potion = Constants.idToPotions[potionId] ?? DefaultPotion();
     potion.setGameManager(gameManager);
-    print(potion.name);
     gameManager.changeFinishedPotion(potion);
   }
 

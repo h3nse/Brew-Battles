@@ -103,11 +103,13 @@ class _WizardViewState extends State<WizardView> {
   @override
   void initState() {
     gameManager = Provider.of<GameManager>(context, listen: false);
+    _duelChannel = supabase.channel('updates').subscribe();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       gameManager.setPlayerHealth(Constants.initialHealth);
       gameManager.setOpponentHealth(Constants.initialHealth);
+      gameManager.setBroadcastChannel(_duelChannel);
+      gameManager.setOnDeathCallback(wizardDied);
     });
-    _duelChannel = supabase.channel('updates').subscribe();
     _duelChannel.onBroadcast(
         event: 'health_update',
         callback: (payload) =>
@@ -148,14 +150,14 @@ class _WizardViewState extends State<WizardView> {
     gameManager.setPlayerActionText('drank ${potion.name}');
 
     applyPotion(potion);
-    notifyPotionAction(potion.id, false);
+    gameManager.notifyPotionAction(potion.id, false);
   }
 
   void throwPotion(Potion potion) {
     // Replace with animation
     gameManager.setPlayerActionText('threw ${potion.name}');
 
-    notifyPotionAction(potion.id, true);
+    gameManager.notifyPotionAction(potion.id, true);
   }
 
   /// where each potions effect is programmed
@@ -163,7 +165,7 @@ class _WizardViewState extends State<WizardView> {
     if (gameManager.hasShield) {
       gameManager.setHasShield(false);
       gameManager.removePlayerActiveEffect('Shielded');
-      notifyEffect('Shielded', true);
+      gameManager.notifyEffect('Shielded', true);
       return;
     }
     potion.applyPotion();
@@ -289,48 +291,6 @@ class _WizardViewState extends State<WizardView> {
     }
   }
 
-  /// Notifying the other player
-  void notifyPotionAction(int potionId, bool isThrown) {
-    _duelChannel.sendBroadcastMessage(
-        event: 'potion_update',
-        payload: {'potionId': potionId, 'isThrown': isThrown});
-  }
-
-  void notifyEffect(String effect, bool remove) {
-    _duelChannel.sendBroadcastMessage(
-        event: 'effect_update', payload: {'effect': effect, 'remove': remove});
-  }
-
-  void notifyHealth(double health) {
-    _duelChannel.sendBroadcastMessage(
-        event: 'health_update', payload: {'health': health});
-  }
-
-  void notifyDeath() {
-    _duelChannel.sendBroadcastMessage(event: 'death', payload: {});
-  }
-
-  /// Effects
-  void takeDamage(double amount) {
-    amount = amount * gameManager.damageMultiplier;
-    gameManager.changePlayerHealth(-amount);
-    if (gameManager.playerHealth <= 0) {
-      gameManager.setPlayerHealth(0);
-      wizardDied(true);
-      notifyDeath();
-    }
-    notifyHealth(gameManager.playerHealth);
-  }
-
-  void heal(double amount) {
-    amount = amount * gameManager.healMultiplier;
-    gameManager.changePlayerHealth(amount);
-    if (gameManager.playerHealth > 100) {
-      gameManager.setPlayerHealth(100);
-    }
-    notifyHealth(gameManager.playerHealth);
-  }
-
   void createPeriodicEffect(
       String effect, int tickSpeed, int tickAmount, Function onTimeout) {
     removeActiveEffect(effect);
@@ -347,7 +307,7 @@ class _WizardViewState extends State<WizardView> {
     );
     activeEffectTimers.add([effect, timer]);
     gameManager.addPlayerActiveEffect(effect);
-    notifyEffect(effect, false);
+    gameManager.notifyEffect(effect, false);
   }
 
   void createTimedEffect(String effect, int duration, Function onTimeout) {
@@ -358,7 +318,7 @@ class _WizardViewState extends State<WizardView> {
     });
     activeEffectTimers.add([effect, timer]);
     gameManager.addPlayerActiveEffect(effect);
-    notifyEffect(effect, false);
+    gameManager.notifyEffect(effect, false);
   }
 
   void removeActiveEffect(String effect) {
@@ -367,7 +327,7 @@ class _WizardViewState extends State<WizardView> {
         activeEffectTimers[i][1].cancel();
         activeEffectTimers.removeAt(i);
         gameManager.removePlayerActiveEffect(effect);
-        notifyEffect(effect, true);
+        gameManager.notifyEffect(effect, true);
       }
     }
   }

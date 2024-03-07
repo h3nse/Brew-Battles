@@ -1,17 +1,51 @@
+import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Global/potions.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GameManager extends ChangeNotifier {
   /// Game
   String _gamestate = 'starting';
+  late RealtimeChannel _channel;
+  late Function _onDeath;
   String _winner = '';
 
   String get gamestate => _gamestate;
+  RealtimeChannel get channel => _channel;
+  Function get onDeath => _onDeath;
   String get winner => _winner;
 
   void changeGamestate(String value) {
     _gamestate = value;
     notifyListeners();
+  }
+
+  void setBroadcastChannel(RealtimeChannel channel) {
+    _channel = channel;
+  }
+
+  void setOnDeathCallback(Function function) {
+    _onDeath = function;
+  }
+
+  void notifyPotionAction(int potionId, bool isThrown) {
+    _channel.sendBroadcastMessage(
+        event: 'potion_update',
+        payload: {'potionId': potionId, 'isThrown': isThrown});
+  }
+
+  void notifyEffect(String effect, bool remove) {
+    _channel.sendBroadcastMessage(
+        event: 'effect_update', payload: {'effect': effect, 'remove': remove});
+  }
+
+  void notifyHealth(double health) {
+    _channel.sendBroadcastMessage(
+        event: 'health_update', payload: {'health': health});
+  }
+
+  void notifyDeath() {
+    _channel.sendBroadcastMessage(event: 'death', payload: {});
   }
 
   void changeWinner(String winner) {
@@ -49,6 +83,27 @@ class GameManager extends ChangeNotifier {
   void changePlayerHealth(double amount) {
     _playerHealth += amount;
     notifyListeners();
+  }
+
+  void heal(double amount) {
+    amount = amount * _healMultiplier;
+    if (_playerHealth + amount > Constants.initialHealth) {
+      setPlayerHealth(Constants.initialHealth);
+    } else {
+      changePlayerHealth(amount);
+    }
+    notifyHealth(_playerHealth);
+  }
+
+  void takeDamage(double amount) {
+    amount = amount * _damageMultiplier;
+    changePlayerHealth(amount);
+    if (_playerHealth <= 0) {
+      setPlayerHealth(0);
+      onDeath(true);
+      notifyDeath();
+    }
+    notifyHealth(_playerHealth);
   }
 
   void setPlayerHealth(double health) {
@@ -166,8 +221,7 @@ class GameManager extends ChangeNotifier {
   }
 
   void resetFinishedPotion() {
-    _finishedPotion.id = 0;
-    _finishedPotion.name = '';
+    changeFinishedPotion(DefaultPotion());
     notifyListeners();
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Global/effects.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
@@ -46,7 +48,13 @@ class PotionOfFire extends Potion {
   @override
   void applyPotion() {
     final burningEffect = Burning();
+
+    final burnDuration = Constants.potionEffectValues[id]!['Duration'];
+    final durationTimer = Timer(Duration(seconds: burnDuration + 1),
+        () => gameManager.removePlayerEffect(burningEffect.name));
+
     burningEffect.setGameManager(gameManager);
+    burningEffect.setDurationTimer(durationTimer);
     gameManager.addPlayerEffect(burningEffect);
   }
 }

@@ -139,9 +139,7 @@ class GameManager extends ChangeNotifier {
   Timer createPeriodicEffect(int tickSpeed, Function onTimeout) {
     final timer = Timer.periodic(
       Duration(seconds: tickSpeed),
-      (timer) {
-        onTimeout();
-      },
+      (timer) => onTimeout(),
     );
     return timer;
   }
@@ -162,6 +160,7 @@ class GameManager extends ChangeNotifier {
         .endEffect();
     _playerActiveEffects.removeWhere((element) => element.name == effectName);
     _playerActiveEffectNames.removeWhere((element) => element == effectName);
+    notifyEffect(effectName, true);
     notifyListeners();
   }
 

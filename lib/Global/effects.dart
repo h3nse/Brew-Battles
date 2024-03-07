@@ -6,6 +6,7 @@ import 'package:brew_battles/Managers/game_manager.dart';
 abstract class Effect {
   String name;
   late Timer timer;
+  late Timer durationTimer;
   late GameManager gameManager;
 
   Effect(this.name);
@@ -18,9 +19,14 @@ abstract class Effect {
     this.timer = timer;
   }
 
+  void setDurationTimer(Timer timer) {
+    this.durationTimer = timer;
+  }
+
   void startEffect() {}
   void endEffect() {
     timer.cancel();
+    durationTimer.cancel();
   }
 }
 
@@ -40,13 +46,5 @@ class Burning extends Effect {
     setTimer(gameManager.createPeriodicEffect(effectValues!['TickSpeed'], () {
       gameManager.takeDamage(effectValues['TickDamage']);
     }));
-
-    print("Starting burn effect");
-  }
-
-  @override
-  void endEffect() {
-    print("Ending burn effect");
-    super.endEffect();
   }
 }

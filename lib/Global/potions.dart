@@ -60,19 +60,29 @@ class PotionOfExplodingHealth extends Potion {
 
   @override
   void applyPotion() {
+    final variation = Constants.potionEffectValues[id]!['Variation'];
+    final random = Random();
+    final zeroOrOne = random.nextInt(2);
+    final amount = 1 + random.nextInt(variation - 1);
+    if (zeroOrOne == 0) {
+      gameManager.heal(amount.toDouble());
+    } else {
+      gameManager.takeDamage(-amount.toDouble());
+    }
+  }
+}
+
+class PotionOfDelayedExplosion extends Potion {
+  PotionOfDelayedExplosion() : super(11, "Potion of Delayed Explosion");
+
+  @override
+  void applyPotion() {
     final aboutToExplodeEffect = AboutToExplode();
     final explosionDelay = Constants.potionEffectValues[id]!['ExplosionDelay'];
-    final variation = Constants.potionEffectValues[id]!['Variation'];
+    final damage = Constants.potionEffectValues[id]!['Damage'];
 
     final timer = Timer(Duration(seconds: explosionDelay), () {
-      final random = Random();
-      final zeroOrOne = random.nextInt(2);
-      final amount = 1 + random.nextInt(variation - 1);
-      if (zeroOrOne == 0) {
-        gameManager.heal(amount.toDouble());
-      } else {
-        gameManager.takeDamage(-amount.toDouble());
-      }
+      gameManager.takeDamage(damage);
       gameManager.removePlayerEffect(aboutToExplodeEffect.name);
     });
 
@@ -80,6 +90,8 @@ class PotionOfExplodingHealth extends Potion {
     gameManager.addPlayerEffect(aboutToExplodeEffect);
   }
 }
+
+
 
 
 

@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Managers/game_manager.dart';
 
 abstract class Effect {
   String name;
-  late Timer timer;
   late Timer durationTimer;
   late GameManager gameManager;
 
@@ -15,36 +15,62 @@ abstract class Effect {
     this.gameManager = gameManager;
   }
 
-  void setTimer(Timer timer) {
-    this.timer = timer;
-  }
-
   void setDurationTimer(Timer timer) {
-    this.durationTimer = timer;
+    durationTimer = timer;
   }
 
   void startEffect() {}
-  void endEffect() {
-    timer.cancel();
-    durationTimer.cancel();
-  }
+  void endEffect() {}
 }
 
 class PlaceHolderEffect extends Effect {
-  PlaceHolderEffect() : super('Placeholder effect');
+  PlaceHolderEffect() : super("Placeholder effect");
 
   @override
   void endEffect() {}
 }
 
+class Stoneskin extends Effect {
+  Stoneskin() : super("Stoneskin");
+
+  @override
+  void startEffect() {
+    gameManager.addOnDamage(0, onDamage);
+  }
+
+  double onDamage(double damageMultiplier) {
+    final damageReduction = damageMultiplier -
+        Constants.effectValues['Stoneskin']!['DamageReduction'];
+    damageMultiplier =
+        max(damageMultiplier - damageReduction, 1 - damageReduction);
+    gameManager.removePlayerEffect(name);
+    return damageMultiplier;
+  }
+
+  @override
+  void endEffect() {
+    gameManager.removeOnDamage(0);
+    super.endEffect();
+  }
+}
+
 class Burning extends Effect {
-  Burning() : super('Burning');
+  late Timer periodicTimer;
+  Burning() : super("Burning");
 
   @override
   void startEffect() {
     final effectValues = Constants.effectValues['Burning'];
-    setTimer(gameManager.createPeriodicEffect(effectValues!['TickSpeed'], () {
+    periodicTimer =
+        gameManager.createPeriodicEffect(effectValues!['TickSpeed'], () {
       gameManager.takeDamage(effectValues['TickDamage']);
-    }));
+    });
+  }
+
+  @override
+  void endEffect() {
+    periodicTimer.cancel();
+    durationTimer.cancel();
+    super.endEffect();
   }
 }

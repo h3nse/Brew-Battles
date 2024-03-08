@@ -139,7 +139,7 @@ class Constants {
     0: DefaultPotion(),
     1: PotionOfHealing(),
     2: ExplodingPotion(),
-    3: PotionOfFire(),
+    3: PotionOfStoneskin(),
   };
 
   static const int msPotionShakeInterval = 2500;
@@ -157,43 +157,7 @@ class Constants {
     ],
     [
       3,
-      [3, 5]
-    ],
-    [
-      4,
-      [8, 9]
-    ],
-    [
-      5,
-      [5, 10]
-    ],
-    [
-      6,
-      [6, 10]
-    ],
-    [
-      7,
-      [3, 6]
-    ],
-    [
-      8,
-      [1, 4, 7]
-    ],
-    [
-      9,
-      [3, 8]
-    ],
-    [
-      10,
-      [3, 4]
-    ],
-    [
-      11,
-      [7, 8]
-    ],
-    [
-      12,
-      [1, 7]
+      [4]
     ]
   ];
 
@@ -201,16 +165,10 @@ class Constants {
     0: {},
     1: {'Heal': 10.0},
     2: {'Damage': -10.0},
-    3: {'Duration': 20},
-    4: {'Duration': 20},
-    5: {'Multiplier': 2.0, 'Duration': 20},
-    6: {'Multiplier': 0.5, 'Duration': 20},
-    7: {'Duration': 15},
-    9: {'Multiplier': 2.0, 'Duration': 20},
-    10: {'Multiplier': 0.5, 'Duration': 20},
   };
 
   static const Map<String, Map<String, dynamic>> effectValues = {
+    'Stoneskin': {'DamageReduction': 0.5},
     'Burning': {'TickSpeed': 1, 'TickDamage': -1.0}
   };
 

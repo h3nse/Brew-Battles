@@ -42,8 +42,20 @@ class ExplodingPotion extends Potion {
   }
 }
 
+class PotionOfStoneskin extends Potion {
+  PotionOfStoneskin() : super(3, "Potion of Stoneskin");
+
+  @override
+  void applyPotion() {
+    final stoneskinEffect = Stoneskin();
+
+    stoneskinEffect.setGameManager(gameManager);
+    gameManager.addPlayerEffect(stoneskinEffect);
+  }
+}
+
 class PotionOfFire extends Potion {
-  PotionOfFire() : super(3, "Potion of Fire");
+  PotionOfFire() : super(10000, "Potion of Fire");
 
   @override
   void applyPotion() {

@@ -72,8 +72,7 @@ class GameManager extends ChangeNotifier {
   bool _isBlinded = false;
   bool _isFrozen = false;
   bool _hasShield = false;
-  double _damageMultiplier = 1;
-  double _healMultiplier = 1;
+  Map<int, Function> _onDamage = {};
 
   double get playerHealth => _playerHealth;
   double get opponentHealth => _opponentHealth;
@@ -87,8 +86,7 @@ class GameManager extends ChangeNotifier {
   bool get isBlinded => _isBlinded;
   bool get isFrozen => _isFrozen;
   bool get hasShield => _hasShield;
-  double get damageMultiplier => _damageMultiplier;
-  double get healMultiplier => _healMultiplier;
+  Map<int, Function> get onDamage => _onDamage;
 
   void changePlayerHealth(double amount) {
     _playerHealth += amount;
@@ -96,7 +94,6 @@ class GameManager extends ChangeNotifier {
   }
 
   void heal(double amount) {
-    amount = amount * _healMultiplier;
     if (_playerHealth + amount > Constants.initialHealth) {
       setPlayerHealth(Constants.initialHealth);
     } else {
@@ -106,7 +103,14 @@ class GameManager extends ChangeNotifier {
   }
 
   void takeDamage(double amount) {
-    amount = amount * _damageMultiplier;
+    double damageMultiplier = 1;
+    print(onDamage);
+    for (var i = 0; i < onDamage.length; i++) {
+      damageMultiplier = onDamage[i]!(damageMultiplier);
+    }
+
+    print("Damage multiplier: $damageMultiplier");
+    amount = amount * damageMultiplier;
     changePlayerHealth(amount);
     if (_playerHealth <= 0) {
       setPlayerHealth(0);
@@ -198,14 +202,16 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setDamageMultiplier(double multiplier) {
-    _damageMultiplier = multiplier;
-    notifyListeners();
+  void addOnDamage(int priority, Function onDamage) {
+    _onDamage[priority] = onDamage;
   }
 
-  void setHealMultiplier(double multiplier) {
-    _healMultiplier = multiplier;
-    notifyListeners();
+  void removeOnDamage(int priority) {
+    _onDamage.removeWhere((key, value) => key == priority);
+  }
+
+  void clearOnDamage() {
+    _onDamage = {};
   }
 
   /// Potion

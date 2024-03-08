@@ -108,19 +108,19 @@ class PotionOfDelayedExplosion extends Potion {
   }
 }
 
-// class PotionOfFire extends Potion {
-//   PotionOfFire() : super(10000, "Potion of Fire");
+class PotionOfFlames extends Potion {
+  PotionOfFlames() : super(12, "Potion of Flames");
 
-//   @override
-//   void applyPotion() {
-//     final burningEffect = Burning();
+  @override
+  void applyPotion() {
+    final burningEffect = Burning();
 
-//     final burnDuration = Constants.potionEffectValues[id]!['Duration'];
-//     final durationTimer = Timer(Duration(seconds: burnDuration + 1),
-//         () => gameManager.removePlayerEffect(burningEffect.name));
+    final burnDuration = Constants.potionEffectValues[id]!['Duration'];
+    final durationTimer = Timer(Duration(seconds: burnDuration + 1),
+        () => gameManager.removePlayerEffect(burningEffect.name));
 
-//     burningEffect.setGameManager(gameManager);
-//     burningEffect.setDurationTimer(durationTimer);
-//     gameManager.addPlayerEffect(burningEffect);
-//   }
-// }
+    burningEffect.setGameManager(gameManager);
+    burningEffect.setDurationTimer(durationTimer);
+    gameManager.addPlayerEffect(burningEffect);
+  }
+}

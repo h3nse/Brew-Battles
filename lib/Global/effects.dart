@@ -54,6 +54,15 @@ class Stoneskin extends Effect {
   }
 }
 
+class AboutToExplode extends Effect {
+  AboutToExplode() : super("About to Explode");
+
+  @override
+  void endEffect() {
+    durationTimer.cancel();
+  }
+}
+
 class Burning extends Effect {
   late Timer periodicTimer;
   Burning() : super("Burning");

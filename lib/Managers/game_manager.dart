@@ -94,10 +94,9 @@ class GameManager extends ChangeNotifier {
   }
 
   void heal(double amount) {
-    if (_playerHealth + amount > Constants.initialHealth) {
+    changePlayerHealth(amount);
+    if (_playerHealth > Constants.initialHealth) {
       setPlayerHealth(Constants.initialHealth);
-    } else {
-      changePlayerHealth(amount);
     }
     notifyHealth(_playerHealth);
   }
@@ -108,8 +107,6 @@ class GameManager extends ChangeNotifier {
     for (var i = 0; i < onDamage.length; i++) {
       damageMultiplier = onDamage[i]!(damageMultiplier);
     }
-
-    print("Damage multiplier: $damageMultiplier");
     amount = amount * damageMultiplier;
     changePlayerHealth(amount);
     if (_playerHealth <= 0) {

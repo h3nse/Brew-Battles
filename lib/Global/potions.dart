@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:brew_battles/Global/constants.dart';
 import 'package:brew_battles/Global/effects.dart';
@@ -54,19 +55,47 @@ class PotionOfStoneskin extends Potion {
   }
 }
 
-class PotionOfFire extends Potion {
-  PotionOfFire() : super(10000, "Potion of Fire");
+class PotionOfExplodingHealth extends Potion {
+  PotionOfExplodingHealth() : super(9, "Potion of Exploding Health");
 
   @override
   void applyPotion() {
-    final burningEffect = Burning();
+    final aboutToExplodeEffect = AboutToExplode();
+    final explosionDelay = Constants.potionEffectValues[id]!['ExplosionDelay'];
+    final variation = Constants.potionEffectValues[id]!['Variation'];
 
-    final burnDuration = Constants.potionEffectValues[id]!['Duration'];
-    final durationTimer = Timer(Duration(seconds: burnDuration + 1),
-        () => gameManager.removePlayerEffect(burningEffect.name));
+    final timer = Timer(Duration(seconds: explosionDelay), () {
+      final random = Random();
+      final zeroOrOne = random.nextInt(2);
+      final amount = 1 + random.nextInt(variation - 1);
+      if (zeroOrOne == 0) {
+        gameManager.heal(amount.toDouble());
+      } else {
+        gameManager.takeDamage(-amount.toDouble());
+      }
+      gameManager.removePlayerEffect(aboutToExplodeEffect.name);
+    });
 
-    burningEffect.setGameManager(gameManager);
-    burningEffect.setDurationTimer(durationTimer);
-    gameManager.addPlayerEffect(burningEffect);
+    aboutToExplodeEffect.setDurationTimer(timer);
+    gameManager.addPlayerEffect(aboutToExplodeEffect);
   }
 }
+
+
+
+// class PotionOfFire extends Potion {
+//   PotionOfFire() : super(10000, "Potion of Fire");
+
+//   @override
+//   void applyPotion() {
+//     final burningEffect = Burning();
+
+//     final burnDuration = Constants.potionEffectValues[id]!['Duration'];
+//     final durationTimer = Timer(Duration(seconds: burnDuration + 1),
+//         () => gameManager.removePlayerEffect(burningEffect.name));
+
+//     burningEffect.setGameManager(gameManager);
+//     burningEffect.setDurationTimer(durationTimer);
+//     gameManager.addPlayerEffect(burningEffect);
+//   }
+// }

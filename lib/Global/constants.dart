@@ -140,6 +140,7 @@ class Constants {
     1: PotionOfHealing(),
     2: ExplodingPotion(),
     3: PotionOfStoneskin(),
+    9: PotionOfExplodingHealth(),
   };
 
   static const int msPotionShakeInterval = 2500;
@@ -158,6 +159,10 @@ class Constants {
     [
       3,
       [4]
+    ],
+    [
+      9,
+      [1, 2]
     ]
   ];
 
@@ -165,6 +170,7 @@ class Constants {
     0: {},
     1: {'Heal': 10.0},
     2: {'Damage': -10.0},
+    9: {'ExplosionDelay': 10, 'Variation': 10}
   };
 
   static const Map<String, Map<String, dynamic>> effectValues = {

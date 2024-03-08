@@ -54,6 +54,26 @@ class Stoneskin extends Effect {
   }
 }
 
+class Regenerating extends Effect {
+  late Timer periodicTimer;
+  Regenerating() : super("Regenerating");
+
+  @override
+  void startEffect() {
+    final effectValues = Constants.effectValues['Regenerating'];
+    periodicTimer =
+        gameManager.createPeriodicEffect(effectValues!['TickSpeed'], () {
+      gameManager.heal(effectValues['TickRegen']);
+    });
+  }
+
+  @override
+  void endEffect() {
+    periodicTimer.cancel();
+    durationTimer.cancel();
+  }
+}
+
 class AboutToExplode extends Effect {
   AboutToExplode() : super("About to Explode");
 
@@ -80,6 +100,5 @@ class Burning extends Effect {
   void endEffect() {
     periodicTimer.cancel();
     durationTimer.cancel();
-    super.endEffect();
   }
 }

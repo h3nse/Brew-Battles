@@ -141,6 +141,7 @@ class Constants {
     2: ExplodingPotion(),
     3: PotionOfStoneskin(),
     9: PotionOfExplodingHealth(),
+    10: PotionOfRegeneration(),
     11: PotionOfDelayedExplosion(),
   };
 
@@ -166,6 +167,10 @@ class Constants {
       [1, 2]
     ],
     [
+      10,
+      [1, 3]
+    ],
+    [
       11,
       [2, 3]
     ],
@@ -176,11 +181,13 @@ class Constants {
     1: {'Heal': 10.0},
     2: {'Damage': -10.0},
     9: {'Variation': 10},
+    10: {'Duration': 20},
     11: {'ExplosionDelay': 10, 'Damage': -5.0}
   };
 
   static const Map<String, Map<String, dynamic>> effectValues = {
     'Stoneskin': {'DamageReduction': 0.5},
+    'Regenerating': {'TickSpeed': 1, 'TickRegen': 1.0},
     'Burning': {'TickSpeed': 1, 'TickDamage': -1.0}
   };
 

@@ -72,6 +72,23 @@ class PotionOfExplodingHealth extends Potion {
   }
 }
 
+class PotionOfRegeneration extends Potion {
+  PotionOfRegeneration() : super(10, "Potion of Regeneration");
+
+  @override
+  void applyPotion() {
+    final regenEffect = Regenerating();
+
+    final regenDuration = Constants.potionEffectValues[id]!['Duration'];
+    final durationTimer = Timer(Duration(seconds: regenDuration + 1),
+        () => gameManager.removePlayerEffect(regenEffect.name));
+
+    regenEffect.setGameManager(gameManager);
+    regenEffect.setDurationTimer(durationTimer);
+    gameManager.addPlayerEffect(regenEffect);
+  }
+}
+
 class PotionOfDelayedExplosion extends Potion {
   PotionOfDelayedExplosion() : super(11, "Potion of Delayed Explosion");
 
@@ -90,10 +107,6 @@ class PotionOfDelayedExplosion extends Potion {
     gameManager.addPlayerEffect(aboutToExplodeEffect);
   }
 }
-
-
-
-
 
 // class PotionOfFire extends Potion {
 //   PotionOfFire() : super(10000, "Potion of Fire");

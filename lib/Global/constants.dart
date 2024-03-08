@@ -194,7 +194,7 @@ class Constants {
     10: {'Duration': 20},
     11: {'ExplosionDelay': 10, 'Damage': -5.0},
     12: {'Duration': 20},
-    13: {'Damage': -10.0, 'Duration': 5}
+    13: {'Damage': -10.0, 'Duration': 10}
   };
 
   static const Map<String, Map<String, dynamic>> effectValues = {

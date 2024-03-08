@@ -20,14 +20,8 @@ class MainChallengeView extends StatelessWidget {
           decoration:
               const InputDecoration(labelText: ("Enter an opponents name")),
         ),
-        ElevatedButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(
-                Theme.of(context).colorScheme.primary),
-            foregroundColor: MaterialStateProperty.all<Color>(
-                Theme.of(context).colorScheme.onPrimary),
-          ),
-          onPressed: () async {
+        GestureDetector(
+          onTap: () async {
             FocusManager.instance.primaryFocus?.unfocus();
             try {
               await challengeOpponent(inputFieldController.text);
@@ -35,8 +29,8 @@ class MainChallengeView extends StatelessWidget {
               displaySnackBar('Couldn\'t find your opponent', 3);
             }
           },
-          child: const Text('Challenge Opponent'),
-        )
+          child: Image.asset('assets/PotionChallengeButton.png'),
+        ),
       ],
     );
   }

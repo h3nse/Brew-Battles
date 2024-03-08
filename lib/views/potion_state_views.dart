@@ -110,7 +110,7 @@ class _MixingPotionState extends State<MixingPotion> {
     return Center(
       child: Consumer<GameManager>(builder: (context, gameManager, child) {
         return (!gameManager.isBlinded)
-            ? Text('${gameManager.mixLevel}')
+            ? Image.asset('assets/PotionMixState${gameManager.mixLevel / 2}')
             : const Text('A Hazy Fog Obscures Your potion');
       }),
     );

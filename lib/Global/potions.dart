@@ -124,3 +124,21 @@ class PotionOfFlames extends Potion {
     gameManager.addPlayerEffect(burningEffect);
   }
 }
+
+class PotionOfIncendiary extends Potion {
+  PotionOfIncendiary() : super(13, "Potion of Incendiary");
+
+  @override
+  void applyPotion() {
+    gameManager.takeDamage(Constants.potionEffectValues[id]!['Damage']);
+    final burningEffect = Burning();
+    final burnDuration = Constants.potionEffectValues[id]!['Duration'];
+
+    final durationTImer = Timer(Duration(seconds: burnDuration + 1),
+        () => gameManager.removePlayerEffect(burningEffect.name));
+
+    burningEffect.setGameManager(gameManager);
+    burningEffect.setDurationTimer(durationTImer);
+    gameManager.addPlayerEffect(burningEffect);
+  }
+}

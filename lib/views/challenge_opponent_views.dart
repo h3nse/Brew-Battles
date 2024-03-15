@@ -29,7 +29,7 @@ class MainChallengeView extends StatelessWidget {
               displaySnackBar('Couldn\'t find your opponent', 3);
             }
           },
-          child: Image.asset('assets/PotionChallengeButton.png'),
+          child: Image.asset('assets/ChallengeButton.png'),
         ),
       ],
     );

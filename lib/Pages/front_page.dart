@@ -43,24 +43,20 @@ class FrontPage extends StatelessWidget {
         title: const Text('Front Page'),
       ),
       body: Center(
-        child: ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(
-                  Theme.of(context).colorScheme.primary),
-              foregroundColor: MaterialStateProperty.all<Color>(
-                  Theme.of(context).colorScheme.onPrimary),
-            ),
-            onPressed: () {
-              if (Player().name == '') {
-                final random = Random();
-                _addPlayer(random.nextInt(10000)); // Create better id system
-              }
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ChallengePage()));
-            },
-            child: const Text('Play')),
+        child: GestureDetector(
+          onTap: () {
+            if (Player().name == '') {
+              final random = Random();
+              _addPlayer(random.nextInt(10000)); // Create better id system
+            }
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const ChallengePage()));
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Image.asset('assets/PlayButton.png'),
+          ),
+        ),
       ),
     );
   }
